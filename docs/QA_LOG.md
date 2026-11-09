@@ -288,3 +288,45 @@ On the FMX files, `import_ready.csv` was compared with the previous commit: 166 
 **How it was proven:** n/a (decision). Today, a file with different headings stops before processing with every missing column named and the found columns listed (`test_R26_missing_column_stops_with_plain_message`).
 **Fix:** Chose neither for now. Column handling is unchanged: the expected headings are fixed, missing ones stop the run with a clear message, and extra ones are warnings. Option 2 is recorded as the next thing to build (OPEN_QUESTIONS.md #8, NOTE_DRAFT.md). Why: the exercise says unseen files will be in the same format, and I chose a small tool that works over a bigger one that might not. Guessing a condition scale would corrupt every rating, so it shouldn't be guessed in any version.
 **Verified by:** n/a (decision recorded in OPEN_QUESTIONS.md #8 and R29).
+
+### QA-027 · 2026-11-08 17:11 · Independent review by a fresh AI subagent (report only, nothing fixed)
+**Rule(s):** R2, R4, R9, R13, R14, R16, R18, R20, R23, R24, R26, R28
+**What looked off:** Before writing the note, a separate AI subagent that took no part in writing the code reviewed it as a skeptical FMX data specialist. It looked for false "ready" rows, rule-vs-code mismatches, row accounting, merge edge cases and plain language. It traced 5 rows end to end and ran adversarial technician files (CSV, xlsx, and headings starting on row 3) built to break the tool. It changed nothing in the repo; its files are in the session scratch folder.
+**First theory:** n/a (review).
+**Cause:** Findings, ranked by the reviewer:
+1. **Wrong data:** 4 ready rows are the same unit as a flagged row: `technician:95`/`partner:40` (RTU-4), `technician:109`/`partner:11` (B-3), `technician:119`/`partner:6` (AHU-2), `technician:141`/`technician:143` (Panel LP-2A). The flagged twin has no serial, so nothing links them, and once someone fills in the nameplate the unit would be imported twice. Suggested fix: tag/panel-name hint on the reason, ~45 min.
+2. **Wrong data:** a year Excel stored as a date-formatted cell (2004 shown as a date = 1905-06-26) becomes 1905 and goes out ready. Suggested fix: flag date years before ~1950, ~15 min.
+3. **Wrong data:** Excel-damaged serials can pass R13: scientific notation (`4.43E+09`), and all-digit serials over 15 digits (Excel keeps only 15 significant digits). Suggested fix: ~15 min.
+4. **Wrong data:** a merge can pair one brand with another brand's model when one row's manufacturer is blank and the other row's model is blank. R23 skips blanks, so "Bell & Gossett / FI2507 (a Taco model)" went out ready. Suggested fix: flag when manufacturer and model come from different rows, ~20 min.
+5. **Wrong data:** two ready rows in `import_ready.csv` are identical: `technician:33` (Panel LP-1B) and `technician:45` (Panel LP-1A). The panel name lives only in Notes, which the import format drops. Suggested fix: flag ready rows with identical output values and quote Notes, ~20 min.
+6. **Minor:** a two-digit year of 27–99 becomes 1927–1999 and is ready; a real "30" would make a 1930 mini-split. Suggested fix: flag results before ~1970, ~10 min.
+7. **Minor (rule mismatch):** R4's "confirm" flag is lost when a keyword-matched technician row merges with a partner row, because `choose_value` takes the partner's clean building. R4 says it always flags. Suggested fix: ~10 min.
+8. **Unclear:** "; " is used both between reasons and inside some reasons ("...; used the lower rating", "Nameplate data missing; technician photo..."), so a reader can't tell where one reason ends. Suggested fix: ~10 min.
+9. **Unclear:** a blank building gives "Serial number also appears at ; check the serial and building". Suggested fix: ~5 min.
+10. **Unclear:** "differs between sources" is used when both rows are technician rows. Suggested fix: ~5 min.
+11. **Unclear:** headings that start on row 3 give 10 "missing column" lines plus "Columns found: (none)" instead of one clear message. Suggested fix: ~10 min.
+12. **Unclear:** "choose the correct type" is shown for Unit Heater, Expansion Tank and Plate Heat Exchanger, which aren't in FMX's list at all. Suggested fix: ~10 min.
+13. **Minor:** a partner row with only Facility filled in is treated as a footer and dropped without a warning (as R2 says, but silently). Suggested fix: ~10 min.
+14. **Minor (other):**
+- "qty 4" without brackets isn't caught by R14 (that row was still flagged, through its asset type).
+- A condition of `1e1` is read as 10.
+- R18 says "captured first" but the code uses file order.
+- On a first run with no previous outputs, a save that fails partway can leave one new file (R28).
+- Lowercase models on technician-only rows are kept as captured (per R7).
+
+**Checked and fine:**
+- Leading zeros (`partner:15` `00644492` matches `644492`), and three-row merges.
+- Year gaps of exactly 2 aren't flagged, gaps of 3 are. Condition gaps of exactly 2 are flagged.
+- Blank or flagged values fall back to the other row.
+- The repeated header row is skipped, and an empty row is dropped.
+- A notes-only row is kept and flagged.
+- R24 works across buildings.
+- Every real merged pair picked the right values.
+- No crash was found.
+**How it was proven:**
+- Row accounting, counted independently from the raw files: 201 IDs in, each appearing exactly once in the output. 166 output rows (115 ready + 51 needs_review) + 35 merged = 201. `review_list.csv` has 51 rows, matching the needs_review rows exactly, and every summary count matches the files.
+- Five traces (`technician:106`+`partner:9`, `partner:40`, `technician:48` and `technician:102`+`partner:37`, `technician:78`, `technician:12`+`technician:44`): every value correct, apart from the duplicate noted in finding 1.
+- Rule-vs-code mismatches: R4 (finding 7), R9 (finding 2), R18 (wording).
+- 176 tests pass.
+**Fix:** None yet; report only, as requested. Which findings to fix is a decision for me.
+**Verified by:** Reviewer's report; adversarial inputs kept in `scratchpad/review/adv/` for re-running after any fix.
