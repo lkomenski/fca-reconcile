@@ -235,6 +235,25 @@ def read_excel_rows(path, sheet_name=None):
         workbook.close()
 
 
+def unread_sheets(path, sheet_name=None):
+    """The sheets of an Excel workbook that the tool does not read (R29).
+
+    Only one sheet per file is read (the named one, otherwise the first),
+    so any other sheet is listed as a warning: data on it would otherwise
+    be ignored without anyone knowing. A CSV file has no sheets.
+    """
+    try:
+        workbook = openpyxl.load_workbook(path, read_only=True)
+    except Exception:
+        return []
+    try:
+        names = workbook.sheetnames
+    finally:
+        workbook.close()
+    read = sheet_name if sheet_name in names else names[0]
+    return [name for name in names if name != read]
+
+
 def read_rows(path, sheet_name=None):
     """Read every row of an .xlsx or .csv file as a list of cell values.
 
@@ -1804,6 +1823,8 @@ def open_input_file(path, label, problems, warnings, details, sheet_name=None):
             f"The {label} '{path.name}' has the extension '{path.suffix or '(none)'}', not .xlsx or .csv. "
             "It opened, so the run continued; check that it is the right file."
         )
+    for sheet in unread_sheets(path, sheet_name):
+        warnings.append(f"Sheet '{sheet}' in the {label} was not read.")
     if not any(to_text(cell) for row in rows for cell in row):
         problems.append(f"The {label} '{path.name}' is empty. Check that you selected the right file.")
         return None

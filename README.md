@@ -145,7 +145,7 @@ The tool only stops for problems with a whole file. A problem with a single row 
 | An output file could not be saved | Saving failed partway; the previous files were put back. | Close the files in the output folder and run again. |
 | The detail file didn't line up row for row with the import file / The row count didn't add up / The tool hit an unexpected problem | Something went wrong inside the tool. | Send `output/error_log.txt` (and the input files, if you can) to a developer. |
 
-**Warnings** (the run continues): an extra column the tool doesn't use, or a file whose extension isn't `.xlsx` or `.csv` but still opened. They're printed on screen and listed at the end of `run_summary.md`. Check that you used the right file.
+**Warnings** (the run continues): an extra column the tool doesn't use, a file whose extension isn't `.xlsx` or `.csv` but still opened, or a workbook sheet that wasn't read. The tool reads one sheet per file (the partner file's `Equipment` sheet, or otherwise the first), so the FMX partner file always warns that its `Legend` sheet wasn't read; that's expected. If a technician workbook has one tab per building, only the first tab is used. They're printed on screen and listed at the end of `run_summary.md`. Check that you used the right file.
 
 **For a developer:** the full technical error is in `output/error_log.txt`. Add `--debug` to the command to show it on screen as well.
 

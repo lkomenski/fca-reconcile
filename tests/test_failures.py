@@ -360,3 +360,24 @@ def test_R31_real_file_panels_lp1a_and_lp1b_are_flagged():
     assert rows["technician:33"]["status"] == "needs_review"
     assert rows["technician:45"]["status"] == "needs_review"
     assert result["counts"]["ready"] == 113
+
+
+def test_R29_unread_sheets_are_warnings_and_run_continues(tmp_path, capsys):
+    import openpyxl
+
+    workbook = openpyxl.Workbook()
+    first = workbook.active
+    first.title = "Elementary"
+    for row in csv.reader(open(UNSEEN_T, encoding="utf-8")):
+        first.append(row)
+    workbook.create_sheet("Middle School").append(TECH_HEADER)
+    path = tmp_path / "tech.xlsx"
+    workbook.save(path)
+
+    code, text = run_main(capsys, path, REAL_PARTNER, "--out", tmp_path / "out")
+    assert code == 0
+    summary = (tmp_path / "out" / "run_summary.md").read_text(encoding="utf-8")
+    assert "Sheet 'Middle School' in the technician file was not read." in summary
+    assert "Sheet 'Legend' in the partner file was not read." in summary
+    assert "Sheet 'Elementary'" not in summary  # the sheet that was read
+    assert_plain(text)

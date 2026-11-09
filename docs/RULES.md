@@ -161,7 +161,7 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 
 **R28: Never leave broken output.** The four outputs are written to a temporary folder first. Only after all four are complete, and the R30 row check passes, are the old files moved aside and replaced. If anything fails, the old files are put back and the temporary files are deleted. Every stop message says whether the previous output files are still there.
 
-**R29: Warnings don't stop the run.** An extra column the tool doesn't use, or an input file with an unfamiliar extension that still opens, is a warning. Warnings are printed on screen and listed under "Warnings" in the run summary, and the run continues. Columns that are expected but unused (`Captured`, `Tech`, `System`) are listed in `mappings.py` and don't produce warnings.
+**R29: Warnings don't stop the run.** An extra column the tool doesn't use, an input file with an unfamiliar extension that still opens, or a workbook sheet that wasn't read ("Sheet 'Legend' in the partner file was not read.") is a warning. Only one sheet per file is read: the partner's `Equipment` sheet, or otherwise the first. Warnings are printed on screen and listed under "Warnings" in the run summary, and the run continues. Columns that are expected but unused (`Captured`, `Tech`, `System`) are listed in `mappings.py` and don't produce warnings.
 - **Decision:** Column names are not mapped flexibly. A file whose headings differ from the expected ones stops with a message listing the missing columns and the columns found.
 - **Why:** See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #8. The exercise says unseen files will be in the same format, and I chose a small tool that works over a bigger one that might not.
 

@@ -1,6 +1,6 @@
 # Run summary
 
-Run on 2026-11-08 at 17:27.
+Run on 2026-11-08 at 17:32.
 
 - Technician file: `Technician_Capture.csv.xlsx`
 - Partner file: `Partner_Equipment_List.xlsx`
@@ -108,4 +108,4 @@ These were not in the building list but contained one building's keyword, so the
 
 ## Warnings
 
-None.
+- Sheet 'Legend' in the partner file was not read.
