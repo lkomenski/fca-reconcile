@@ -230,3 +230,61 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 Values are counted per input row before merging, so a spelling covered by the other source in a merged row still shows up.
 **Fix:** A new section, "Values the tool didn't recognize", with field, value as captured, file and rows, plus "Building names matched by keyword".
 **Verified by:** `test_R22_summary_lists_every_unrecognized_value_by_field`. On the second unseen file the section listed 13 values, including `Johnson Controls`, `Trane Technologies`, `Cooling Tower` and `7/10`.
+
+### QA-023 · 2026-11-08 16:59 · Keyword-matched buildings no longer go out as ready
+**Rule(s):** R4
+**What looked off:** QA-020 found that "Westlake Middle", a school outside the district, was accepted as Lakeview Middle School and marked ready.
+**First theory:** Either tighten the keywords (require "Lakeview") or always ask a person.
+**Cause:** A judgment call. Keywords can't tell a new spelling of a district building from a different school or a separate annex.
+**How it was proven:** Second unseen file before the change: 3 ready, including `technician:9` "Westlake Middle". After the change: 1 ready (`partner:4`, which uses the alias "Lakeview HS"). All 4 keyword matches are needs_review with "Building '...' matched ... by keyword; confirm", and the building is still filled in. FMX files: no change (0 keyword matches; all 16 spellings are aliases).
+**Fix:** A keyword match always adds that reason, so the alias list is the only path to ready. The decision and its why are recorded under R4.
+**Verified by:** `test_R4_keyword_match_fills_building_but_needs_confirmation` (5 cases) and `test_UNSEEN_second_file_new_spellings_are_flagged_or_listed`, updated to expect 1 ready / 12 needs_review and Westlake = needs_review.
+
+### QA-024 · 2026-11-08 16:59 · Failing gracefully: file checks, plain messages, safe outputs
+**Rule(s):** R25, R26, R27, R28, R29
+**What looked off:** Before this change, a missing column printed `ERROR: The technician file is missing these columns: ...` and stopped at the first problem. A row that hit an unexpected value would have crashed the whole run with a Python traceback. A failure while writing could leave `import_ready.csv` new and `review_list.csv` old. A typo in `mappings.py` crashed on import with a Python `SyntaxError`, before any message could be shown.
+**First theory:** n/a. These were requested hardening items, checked one by one.
+**Cause:** n/a
+**How it was proven:** Each behavior has a test that runs the full command. Every one checks that the screen shows plain language with no Python error names or traceback, and where relevant, that previous outputs are byte-for-byte unchanged and no temporary files are left:
+- Missing column (`Serial #` removed): stops, names the column, lists the columns found, says the previous outputs were not changed.
+- Two problems at once (2 missing columns + missing partner file): all 3 reported in one run.
+- Empty file, and a file with headings but no rows: plain stop messages.
+- Files in the wrong order: one message saying so, not a list of missing columns.
+- Damaged `.xlsx`: plain stop; the traceback goes to `error_log.txt`, or to the screen with `--debug`.
+- Broken `mappings.py` (simulated `SyntaxError` at line 12): "mappings.py has a typing mistake near line 12".
+- Deliberately broken row: `normalize_location` made to fail on `technician:8`. The run finishes (exit 0), the row is in the review list with "Could not process this row automatically: ...", and its former partner match `partner:5` is output on its own. Row check: 11 in, accounting holds. Details are in `error_log.txt`.
+- Run failing partway: `write_review_list` made to fail after the import file was written to the temporary folder. Exit 1, "Your previous output files ... were not changed", and the outputs are byte-identical to before.
+- Extra column `Inspector Notes` and a `.txt` extension: both listed as warnings in the run summary; the run continues.
+**Fix:** Added `check_input_files` (all file checks before any processing), `report_stop`/`write_error_log`, the `--debug` flag, `StopRun`, per-row and per-group error handling (`fallback_row`), temp-folder writing with restore (`write_outputs`), and a guarded `mappings.py` import. Expected-but-unused columns (`Captured`, `Tech`, `System`) are listed in `mappings.py` so they don't warn.
+**Verified by:** `tests/test_failures.py`, 12 tests for R25–R29; 176 tests pass in total.
+
+### QA-025 · 2026-11-08 16:59 · Serial checks across rows, years stored as dates, leading zeros
+**Rule(s):** R9, R16, R22, R23, R24
+**What looked off:** Four gaps for unseen files:
+- (a) Two different units with a mistyped shared serial would merge, and one unit would vanish.
+- (b) A serial captured in two buildings went unnoticed.
+- (c) A year stored as a date (`2004-01-01`) or a decimal string (`2004.0`) was flagged as unreadable, and `00644492` didn't match `644492`.
+- (d) The summary should name its input files and run time.
+**First theory:** n/a (requested).
+**Cause:** n/a
+**How it was proven:** Unit tests for each:
+- R23: a different model blocks the merge and flags both rows; case and dash differences still merge.
+- R24: both rows flagged, each naming the other building.
+- R9: 5 date and decimal forms → 2004.
+- R16: leading zeros ignored only for all-digit serials (`0A12` ≠ `A12`).
+- R22: file names and "Run on" appear in the summary.
+
+On the FMX files, `import_ready.csv` was compared with the previous commit: 166 rows, 0 cells differ. No FMX pair has conflicting details, no serial is in two buildings, and no leading-zero match is new.
+**Fix:** Added `details_conflict`/`process_group` (R23), `flag_serials_in_several_buildings` (R24), date and decimal handling in `parse_install_year` (R9), leading-zero handling in `serial_key` (R16), and file names plus run date/time in the summary (R22). The summary already had a run time and two file names; it now lists all three input files.
+**Verified by:** `test_R23_*` (2), `test_R24_*`, `test_R9_year_stored_as_date_or_decimal` (5), `test_R16_leading_zeros_ignored_only_for_all_digit_serials`, `test_R22_summary_names_input_files_and_run_time`.
+
+### QA-026 · 2026-11-08 16:59 · [Decision, scoped out] Column names from other sources
+**Rule(s):** R1, R2, R26
+**What looked off:** Different sources will name columns differently. Another partner might write "Mfr." or "Serial No." instead of "Manufacturer" or "Serial Number", and a technician app might export "Condition" on an unknown scale.
+**First theory:** Make the loader accept more heading names.
+**Cause:** A design decision, not a bug. Two options were considered:
+1. A growing list of accepted headings in `mappings.py`. Every new source means another code-adjacent edit, the list can quietly match the wrong column, and it can't tell which condition scale a "Condition" column uses.
+2. A column-map file the tool writes out when it meets headings it doesn't recognize. A person fills it in once per new source format (matching each heading to a field and setting the condition scale), and the tool reuses it automatically.
+**How it was proven:** n/a (decision). Today, a file with different headings stops before processing with every missing column named and the found columns listed (`test_R26_missing_column_stops_with_plain_message`).
+**Fix:** Chose neither for now. Column handling is unchanged: the expected headings are fixed, missing ones stop the run with a clear message, and extra ones are warnings. Option 2 is recorded as the next thing to build (OPEN_QUESTIONS.md #8, NOTE_DRAFT.md). Why: the exercise says unseen files will be in the same format, and I chose a small tool that works over a bigger one that might not. Guessing a condition scale would corrupt every rating, so it shouldn't be guessed in any version.
+**Verified by:** n/a (decision recorded in OPEN_QUESTIONS.md #8 and R29).

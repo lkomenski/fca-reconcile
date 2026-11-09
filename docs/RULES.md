@@ -29,10 +29,10 @@ Principles that apply to every rule:
   - "middle" or "MS" → Lakeview Middle School.
   - "high" or "HS" → Lakeview High School.
   - Matching is case-insensitive and on whole words, so "LMS", "Estates" and "Highland" don't match.
-  - Names accepted this way are listed in the run summary so they can be added to the table.
+- A single keyword match fills in the building, but the row is always flagged: "Building 'X' matched Lakeview Middle School by keyword; confirm". Names matched this way are also listed in the run summary so they can be added to the table.
 - Flag: no keyword match → "Building 'X' is not a recognized building name". More than one match → "Building 'X' could mean more than one building (...)". Blank → "Building is missing".
-- **Decision:** The alias list stays and is checked first. Keywords are a fallback for spellings it doesn't cover, so a new building spelling on an unseen file doesn't have to be added by hand before the tool can use it.
-- **Why:** The district has three buildings, so a name containing "middle" can only mean one of them. Matching more than one building, or none, is still a guess, so it's flagged. One known limit: a name from outside the district, like "Westlake Middle", would be accepted as Lakeview Middle School. It shows up in the run summary's keyword list, but the row isn't flagged (QA-020).
+- **Decision:** The alias list is the only path to ready. A keyword match fills in the building, so the specialist only has to confirm it, but it always marks the row needs_review.
+- **Why:** A different school or a separate annex accepted as ready would be wrong data nobody sees; a quick confirmation is cheap. "Westlake Middle", for example, contains "middle" but isn't in the district (QA-020, QA-023).
 
 **R5: Asset type.** The accepted asset types are read from `Asset_Types.xlsx` every run, not copied into the code, so an exact accepted name (any case or spacing) is always recognized. Other spellings come from the asset type table in `mappings.py` (e.g. `RTU`, `roof top AC`, `RTU (gas/elec)` → `Rooftop Unit`). At startup the tool checks that every value the table maps to appears in `Asset_Types.xlsx`, and stops if one doesn't.
 - For partner rows, the type comes from the Equipment Description. The tool takes the text before the first comma, removes the Tag value and any "(qty N)" note, and looks up what's left. For example, "Hot Water Boiler B-1, 1,500 MBH" with tag `B-1` becomes "Hot Water Boiler".
@@ -57,6 +57,7 @@ Principles that apply to every rule:
 - A four-digit year is kept as is (e.g. `1998`).
 - A two-digit year, with or without an apostrophe (`'04`, `98`, `21`): up to the last two digits of the current year becomes 20xx, and anything higher becomes 19xx. Run in 2026, that means 00–26 → 2000s and 27–99 → 1900s.
 - A manufacture date like `Mfg 04/2011` becomes `2011`.
+- A year Excel stored as a date (`2004-01-01`) or a decimal (`2004.0`) becomes `2004`.
 - An approximate year (`approx. 2004`, `~2004`, `2004?`, `c. 2012`) keeps the year, stays ready, and is counted in the run summary as "approximate years accepted".
 - Blank stays blank and is not flagged on its own.
 - Flag: a year after the current year (e.g. `2031`) → "Install year 2031 is in the future". Anything else that isn't a clear single year from 1900 on (e.g. `19987`, `2000s`, `unknown`) → "Install year 'X' could not be read as a year".
@@ -99,7 +100,7 @@ Principles that apply to every rule:
 
 ## Duplicates
 
-**R16: Finding duplicates.** Two or more rows are the same equipment if they have the same building (after R4) and the same serial number, compared with spaces, dashes, and case ignored. This applies across both files and within the technician file.
+**R16: Finding duplicates.** Two or more rows are the same equipment if they have the same building (after R4) and the same serial number, compared with spaces, dashes, and case ignored. When both serials are all digits, leading zeros are also ignored (`00644492` matches `644492`, since Excel drops leading zeros from numbers). The original serial is kept in the output. This applies across both files and within the technician file. R23 can stop a match from merging.
 - Blank serials and placeholder values (`N/A`, `see schedule`, and the other entries in the serial placeholder list in `mappings.py`) are never matched.
 - All rows sharing a building and serial become one output row.
 - `source` is `both` if the group has rows from both files, and otherwise the name of the one file.
@@ -132,4 +133,32 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 **R22: Outputs.** Written to the output folder:
 - `import_ready.csv`: exactly the columns of `Target_Format.xlsx`, in order, with every output row (ready and needs_review).
 - `review_list.csv`: only needs_review rows, with the reason, the source row IDs, and the raw captured values next to the cleaned ones.
-- `run_summary.md`: rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason. It also lists every value the tool didn't recognize, by field (building, asset type, manufacturer, condition, install year), with the file it came from and the number of input rows, plus every building name accepted by keyword. A specialist can then update `mappings.py` in one pass.
+- `run_summary.md`: the run date and time and the input file names; rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason. It also lists every value the tool didn't recognize, by field (building, asset type, manufacturer, condition, install year), with the file it came from and the number of input rows, plus every building name accepted by keyword. A specialist can then update `mappings.py` in one pass.
+
+## Checks across rows
+
+**R23: Same serial, different equipment details.** If rows that would merge under R16 disagree on manufacturer or model (after spelling fixes, ignoring case, spaces and dashes, and skipping blanks), they are **not** merged. Each is output on its own and flagged: "Same serial but different equipment details; possible serial typo (same serial as partner:42)".
+- **Decision:** Don't merge, flag both.
+- **Why:** Two different units with a mistyped serial would otherwise become one row, and one unit would silently disappear from the import.
+
+**R24: Serial in more than one building.** If the same serial (compared as in R16) appears at more than one building, every one of those rows is flagged: "Serial number also appears at Lakeview Middle School; check the serial and building". The rows are not merged, because R16 only merges within a building.
+
+## Failing gracefully
+
+**R25: Rows that can't be processed never stop the run.** If anything goes wrong while cleaning or merging a row, for any reason, including ones nobody planned for, the row is still output. Its values are kept as captured, the year and condition are left blank, and it is flagged: "Could not process this row automatically: a value in this row is in a format the tool doesn't handle (details in error_log.txt)". It is never merged, and the R21 accounting still holds. The technical details are written to `error_log.txt` in the output folder.
+
+**R26: Only file-level problems stop the run.** Before processing anything, the tool checks all of these and reports every problem it finds at once:
+- A missing, unreadable, or empty file, including the accepted asset types and target format files.
+- A file with headings but no rows.
+- A missing required column. The message names the column and lists the columns that were found.
+- The two files passed in the wrong order, or the wrong kind of file in either place.
+- A broken `mappings.py`.
+- An output file open in another program.
+
+**R27: Plain-language messages.** Every stop message says what went wrong, which file or column, and exactly what to do next. No Python errors are shown on screen. The full technical error is saved to `error_log.txt` in the output folder for a developer; `--debug` also shows it on screen. A successful run removes an old `error_log.txt`, so it can't be mistaken for a current problem, unless rows from this run couldn't be processed.
+
+**R28: Never leave broken output.** The three outputs are written to a temporary folder first. Only after all three are complete are the old files moved aside and replaced. If anything fails, the old files are put back and the temporary files are deleted. Every stop message says whether the previous output files are still there.
+
+**R29: Warnings don't stop the run.** An extra column the tool doesn't use, or an input file with an unfamiliar extension that still opens, is a warning. Warnings are printed on screen and listed under "Warnings" in the run summary, and the run continues. Columns that are expected but unused (`Captured`, `Tech`, `System`) are listed in `mappings.py` and don't produce warnings.
+- **Decision:** Column names are not mapped flexibly. A file whose headings differ from the expected ones stops with a message listing the missing columns and the columns found.
+- **Why:** See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #8. The exercise says unseen files will be in the same format, and I chose a small tool that works over a bigger one that might not.

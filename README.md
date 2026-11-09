@@ -30,7 +30,7 @@ When it finishes, it prints a one-line count like:
 Rows in: 146 technician + 55 partner. Ready: 117. Needs review: 49. Merged into duplicates: 35.
 ```
 
-If it prints `ERROR:`, the message says which file or column is the problem (for example, a missing column). If it prints `STOPPED:`, the row count didn't add up and no files were written. That should never happen, so report it.
+If it prints `STOPPED:`, nothing was changed. The message says what went wrong and what to do; see section 8, "If something goes wrong".
 
 ## 3. What it writes
 
@@ -58,6 +58,7 @@ Three files appear in the `output` folder (it's created if needed, and files fro
 | Manufacturer 'X' is not a recognized spelling | The name isn't in the known list. Plain "Mitsubishi" is left out on purpose because it could be Mitsubishi Electric or Mitsubishi Heavy Industries. | Confirm from the photo or model number. Add a new spelling to `mappings.py` if it's safe. |
 | Manufacturer is missing | A model or serial was captured but no manufacturer. | Fill it in from the photo or model number. |
 | Building 'X' is not a recognized building name / Building is missing | The building name doesn't match any known spelling or keyword. | Correct the building. Add the spelling to `mappings.py` if it's a real variant. |
+| Building 'X' matched [building] by keyword; confirm | The name isn't in the building list, but contains one building's keyword (e.g. "Middle Sch."). The building was filled in. | Check it really is that building, and not another school or a separate annex. If it is, add the spelling to `BUILDINGS` in `mappings.py` so it's ready next time. |
 | Building 'X' could mean more than one building | The name contains keywords for two buildings (e.g. "Elem/Middle Shared Gym"). | Pick the right building. |
 | Install year 'X' could not be read as a year | E.g. "unknown", "2000s", or a typo like "19987". | Find the year on the nameplate or photo, or leave it blank. |
 | Install year YYYY is in the future | Almost always a typo. | Correct it from the nameplate. |
@@ -68,13 +69,18 @@ Three files appear in the `output` folder (it's created if needed, and files fro
 | Serial NNNN may have been rounded by Excel | An all-number serial ending in 0000; Excel often damages long numbers. | Check the serial against the photo or nameplate. |
 | One row describes N units | A single partner row covers several units (e.g. "qty 4"). | Split it into one row per unit with each serial (from the partner's mechanical schedule). |
 | Technician note / Partner comment may affect this row | The note mentions something like "replaced", "abandoned" or "locked out". | Read the quoted note and update the year, condition, or row as needed. |
+| Same serial but different equipment details; possible serial typo | Two rows share a serial, but their manufacturer or model differ, so they weren't merged. | Check both serials against the photos or nameplates; one is probably mistyped. If they really are the same unit, delete one row. |
+| Serial number also appears at [building] | The same serial was captured in two buildings. One unit can't be in both. | Check the serial and the building on both rows. |
+| Could not process this row automatically: ... | Something in the row was in a format the tool didn't expect. The row is kept with its values as captured. | Fix the row by hand from the raw values. If it keeps happening, send `output/error_log.txt` to a developer. |
 | Technician note says this is a repeat entry, but no matching serial was found | The note says "2nd pass", but there's no serial to match it to its first entry. | Find the first entry (often same building, tag and location) and delete one of the two. |
 
 Rows marked `ready` need no action. The run summary also counts two things that are accepted but worth knowing: approximate years (e.g. "~2004") kept as is, and rows where the partner's year of manufacture is used as the install year.
 
 ## 5. Running it on a new technician file
 
-The tool works on any technician file with the same column headings (`Bldg`, `Equip Type`, `Mfr`, `Model #`, `Serial #`, `Yr Installed`, `Cond (1-10)`, `Location`, `Notes`, `Photo`), and any partner file with the same headings as `Partner_Equipment_List.xlsx`. Extra columns are ignored. Title rows, blank rows, footers and repeated header rows are skipped automatically. If a required column is missing, the tool stops and names it.
+The tool works on any technician file with the same column headings (`Bldg`, `Equip Type`, `Mfr`, `Model #`, `Serial #`, `Yr Installed`, `Cond (1-10)`, `Location`, `Notes`, `Photo`), and any partner file with the same headings as `Partner_Equipment_List.xlsx`. Extra columns are ignored and listed as a warning in the run summary. Title rows, blank rows, footers and repeated header rows are skipped automatically.
+
+A file with different column names will stop with a clear message listing the columns it expected and the columns it found.
 
 ## 6. Teaching it a new spelling
 
@@ -111,6 +117,32 @@ python -m pytest
 
 At the end it prints one line per rule, e.g. `R10 technician condition 1-10 to 1-5: 17 cases passed`. The rules themselves are written out in plain English in [docs/RULES.md](docs/RULES.md).
 
+## 8. If something goes wrong
+
+The tool only stops for problems with a whole file. A problem with a single row never stops it; that row goes to the review list instead. When it stops, it lists **every** problem it found at once, and says whether your previous output files are still there. It never leaves half-written outputs: either all three files are replaced, or none are.
+
+| Message starts with | What it means | What to do |
+|---|---|---|
+| The technician file / partner file '...' was not found | The file name or folder in the command doesn't match a real file. | Check the spelling, the folder, and the extension (`.xlsx`). Dragging the file into the terminal window types its full path for you. |
+| ... could not be opened. It may be damaged or not a spreadsheet | The file isn't a readable spreadsheet. | Open it in Excel, choose **Save As** → `.xlsx`, and run again with the new file. |
+| ... could not be opened because another program is using it | The input file is locked, usually because it's open in Excel. | Close it in Excel and run again. |
+| ... is empty / has column headings but no equipment rows | The file has no data. | Check that you selected the right file. |
+| The technician file is missing the column '...' (followed by "Columns found in ...") | A required column is missing or was renamed. | Check you selected the right file. If a column was renamed, rename it back to the name shown. |
+| The partner file '...' has no header row with the columns 'Facility' and 'Serial Number' | The partner file isn't in the expected layout. | Check you selected the partner equipment list. |
+| The two files seem to be in the wrong order | The partner file came first in the command. | Put the technician file first and the partner file second. |
+| The technician file '...' looks like a partner equipment list (or the reverse) | The same kind of file was given twice. | Check both file names in the command. |
+| mappings.py has a typing mistake near line N | A recent edit to `mappings.py` broke it. | Undo the last change, or check that every spelling is in quotes and followed by a comma (section 6). |
+| mappings.py: '...' is listed under both ... | The same spelling is under two different values. | Remove it from one of them. |
+| mappings.py uses asset types that aren't in 'Asset_Types.xlsx' | A value on the left of `ASSET_TYPES` or in `ASSET_TYPES_WITHOUT_SERIAL` isn't an accepted type. | Fix its spelling to match `Asset_Types.xlsx` exactly. |
+| The target format file ... has columns the tool doesn't know how to fill | The target format file isn't FMX's. | Use `data/Target_Format.xlsx`. |
+| The output file '...' is open in another program | An output file is open in Excel, so it can't be replaced. | Close it and run again. |
+| An output file could not be saved | Saving failed partway; the previous files were put back. | Close the files in the output folder and run again. |
+| The row count didn't add up / The tool hit an unexpected problem | Something went wrong inside the tool. | Send `output/error_log.txt` (and the input files, if you can) to a developer. |
+
+**Warnings** (the run continues): an extra column the tool doesn't use, or a file whose extension isn't `.xlsx` or `.csv` but still opened. They're printed on screen and listed at the end of `run_summary.md`. Check that you used the right file.
+
+**For a developer:** the full technical error is in `output/error_log.txt`. Add `--debug` to the command to show it on screen as well.
+
 ## Folder layout
 
 ```
@@ -122,4 +154,5 @@ tests/            automated checks, with small made-up files in tests/fixtures/
 docs/RULES.md     every rule in plain English, with the decisions behind it
 docs/QA_LOG.md    what looked off during the build and how each issue was checked
 docs/TIME_LOG.md  timestamps for the build
+docs/OPEN_QUESTIONS.md  decisions made without enough information, and what to build next
 ```

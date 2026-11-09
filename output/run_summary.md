@@ -1,7 +1,11 @@
 # Run summary
 
-Run at 2026-11-08 16:46.
-Technician file: `Technician_Capture.csv.xlsx`. Partner file: `Partner_Equipment_List.xlsx`.
+Run on 2026-11-08 at 17:00.
+
+- Technician file: `Technician_Capture.csv.xlsx`
+- Partner file: `Partner_Equipment_List.xlsx`
+- Accepted asset types: `Asset_Types.xlsx`
+- Target format: `Target_Format.xlsx`
 
 | Count | Rows |
 |---|---|
@@ -75,3 +79,7 @@ These were not in the building list but contained one building's keyword, so the
 | Value as captured | Matched to | Rows |
 |---|---|---|
 | (none) | | 0 |
+
+## Warnings
+
+None.

@@ -32,6 +32,13 @@ RULE_NAMES = {
     "R20": "status and reasons",
     "R21": "row accounting",
     "R22": "outputs",
+    "R23": "same serial, different details",
+    "R24": "serial in more than one building",
+    "R25": "rows that can't be processed",
+    "R26": "file checks before processing",
+    "R27": "plain messages and error log",
+    "R28": "never leave broken output",
+    "R29": "warnings",
     "UNSEEN": "full run on a made-up unseen file",
 }
 

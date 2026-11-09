@@ -31,3 +31,9 @@ Manufacturers and asset types should come from whatever FMX already uses as its 
 ## 7. Which equipment commonly has no serial (R12)
 
 I'm not sure which equipment commonly has no serial. The list starts with Electrical Panel only, and anything not on it is flagged, which is the cautious direction: the worst case is a few extra review rows, not missing serials going out as ready. Technicians or Professional Services can tell me which types to add.
+
+## 8. Files with different column names (R1, R2, R26)
+
+Different sources will name columns differently. Rather than guessing, or growing a list of headings in code, the next version should write out a column-map file when it meets headings it doesn't recognize. A person matches them to fields once per new source format, and the tool reuses that map automatically. The condition scale would be set in the same file, because guessing it would corrupt every rating: a "4" means something very different on a 1–5 scale than on a 1–10 scale.
+
+I didn't build it now. The exercise says unseen files will be in the same format, and I chose a small tool that works over a bigger one that might not. For now, a file with different column names stops with a clear message listing the missing columns and the columns it found.

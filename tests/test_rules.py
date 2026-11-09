@@ -152,8 +152,10 @@ def test_R4_unknown_or_blank_building_is_flagged(raw, reason):
         ("lakeview HIGH annex", "Lakeview High School"),
     ],
 )
-def test_R4_keyword_fallback_maps_names_not_in_the_list(raw, expected):
-    assert rc.normalize_building(raw) == (expected, None)
+def test_R4_keyword_match_fills_building_but_needs_confirmation(raw, expected):
+    value, problem = rc.normalize_building(raw)
+    assert value == expected
+    assert problem.reason == f"Building '{raw}' matched {expected} by keyword; confirm"
 
 
 def test_R4_name_matching_two_buildings_is_flagged():
@@ -612,14 +614,17 @@ def test_UNSEEN_made_up_files_reconcile_with_expected_counts():
 def test_UNSEEN_second_file_new_spellings_are_flagged_or_listed():
     result = rc.reconcile(FIXTURES / "unseen_technician_2.csv", FIXTURES / "unseen_partner.csv", current_year=YEAR)
     counts = result["counts"]
-    assert (counts["technician_in"], counts["ready"], counts["needs_review"]) == (10, 3, 10)
+    assert (counts["technician_in"], counts["ready"], counts["needs_review"]) == (10, 1, 12)
     rows = {row["row_ids"][0]: row for row in result["rows"]}
     assert rows["technician:4"]["values"]["asset_type"] == "Switchgear"  # from Asset_Types.xlsx only
-    assert rows["technician:4"]["status"] == "ready"
+    # "Middle Sch." is not in the alias list, so it needs confirmation even though all else is clean.
+    assert rows["technician:4"]["review_reason"] == "Building 'Middle Sch.' matched Lakeview Middle School by keyword; confirm"
     assert "Manufacturer 'Johnson Controls'" in rows["technician:2"]["review_reason"]
     assert "Asset type 'Cooling Tower'" in rows["technician:3"]["review_reason"]
     assert "could mean more than one building" in rows["technician:6"]["review_reason"]
-    # Known limit of the keyword fallback: another school's name with "middle" is accepted.
+    # Another school's name with "middle" is filled in but never ready: a person confirms it.
     assert rows["technician:9"]["values"]["building"] == "Lakeview Middle School"
+    assert rows["technician:9"]["status"] == "needs_review"
+    assert "matched Lakeview Middle School by keyword; confirm" in rows["technician:9"]["review_reason"]
     assert len(result["keyword_buildings"]) == 4
     assert result["unrecognized"][("manufacturer", "Trane Technologies", "technician")] == 1

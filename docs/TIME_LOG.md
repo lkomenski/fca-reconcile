@@ -19,4 +19,5 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 16:36 | R12 changed to an editable list of asset types allowed to have no serial. 115 ready / 51 needs_review / 35 merged. Commit `34419f6`. |
 | 16:37 | OPEN_QUESTIONS.md added and referenced from R18/R19. Commit `03b2fe5`. |
 | 16:38 | R8 room-number cleanup: 16 locations standardized, counts unchanged, 135 tests pass. Commit `c8beb6b`. |
-| 16:47 | Unseen-file hardening: unrecognized-values summary, building keyword fallback, accepted asset types read at run time, 8 note keywords, second unseen file. FMX counts unchanged; 155 tests pass. |
+| 16:47 | Unseen-file hardening: unrecognized-values summary, building keyword fallback, accepted asset types read at run time, 8 note keywords, second unseen file. FMX counts unchanged; 155 tests pass. Commit `e5d6b7d`. |
+| 16:59 | Keyword buildings → needs_review; graceful failure (file checks, plain messages, error log, safe outputs, row errors, warnings); serial checks across rows; years as dates; column-map idea scoped out; NOTE_DRAFT started. FMX counts unchanged; 176 tests pass. |

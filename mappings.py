@@ -173,6 +173,10 @@ TECHNICIAN_COLUMNS = {
     "Photo": "photo",
 }
 
+# R29: Technician columns that are expected but not used. Any other column not
+# listed above or here produces a warning in the run summary.
+TECHNICIAN_IGNORED_COLUMNS = ["Captured", "Tech"]
+
 # R2: Partner column headers -> internal field names.
 PARTNER_COLUMNS = {
     "Facility": "building",
@@ -186,3 +190,6 @@ PARTNER_COLUMNS = {
     "Tag": "tag",
     "Comments": "notes",
 }
+
+# R29: Partner columns that are expected but not used.
+PARTNER_IGNORED_COLUMNS = ["System"]
