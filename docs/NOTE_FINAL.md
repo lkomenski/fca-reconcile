@@ -2,7 +2,7 @@
 
 **What it does.** One command reconciles both files into FMX's import format. On your files: 201 rows in, 112 ready, 54 flagged with plain reasons, 35 duplicates merged. 67% of rows need no one, so a specialist reviews 54 explained rows instead of reconciling two spreadsheets for two days (an estimate I'd measure with a specialist).
 
-**What works.** Every input row is accounted for, or the run stops. Values are fixed only from editable lookups; anything else is flagged, never guessed. full_detail.csv keeps what the import format drops: notes, tags, photos. A bad row never stops the run; a bad file stops with a clear message. 210 tests pass, including a shuffled copy of your file.
+**What works.** Every input row is accounted for, or the run stops. Values are fixed only from editable lookups or the file’s own evidence; anything else is flagged, never guessed. full_detail.csv keeps what the import format drops: notes, tags, photos. A bad row never stops the run; a bad file stops with a clear message. 210 tests pass, including a shuffled copy of your file.
 
 **Independent review.** A separate AI reviewer that didn't write the code found five ways wrong data could go out as ready, like a year Excel turned into 1905. I fixed four and added a safeguard for the fifth.
 
