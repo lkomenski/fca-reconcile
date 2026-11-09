@@ -24,11 +24,14 @@ python reconcile.py data/Technician_Capture.csv.xlsx data/Partner_Equipment_List
 
 Change the two file names if yours are different. Both files can be `.xlsx` or `.csv`. The input files are only read, never changed.
 
-When it finishes, it prints a one-line count like:
+When it finishes, it prints any warnings and a one-line count like:
 
 ```
-Rows in: 146 technician + 55 partner. Ready: 117. Needs review: 49. Merged into duplicates: 35.
+Warning: Sheet 'Legend' in the partner file was not read.
+Rows in: 146 technician + 55 partner. Ready: 113. Needs review: 53. Merged into duplicates: 35.
 ```
+
+The `Legend` warning is expected for FMX's partner file (see section 8).
 
 If it prints `STOPPED:`, nothing was changed. The message says what went wrong and what to do; see section 8, "If something goes wrong".
 
@@ -151,15 +154,17 @@ The tool only stops for problems with a whole file. A problem with a single row 
 
 ## Folder layout
 
-```
-reconcile.py      the tool
-mappings.py       lookup lists (safe to edit)
-data/             input files, exactly as received from FMX
-output/           what the tool writes
-tests/            automated checks, with small made-up files in tests/fixtures/
-docs/RULES.md     every rule in plain English, with the decisions behind it
-docs/QA_LOG.md    what looked off during the build and how each issue was checked
-docs/TIME_LOG.md  timestamps for the build
-docs/OPEN_QUESTIONS.md  decisions made without enough information, and what to build next
-docs/EXTENDING.md       for the team taking the tool over: how to extend it, and its built-in limits
-```
+| Path | What it is |
+|---|---|
+| [reconcile.py](reconcile.py) | The tool |
+| [mappings.py](mappings.py) | Lookup lists (safe to edit; see section 6) |
+| [data/](data/) | Input files, exactly as received from FMX |
+| [output/](output/) | What the tool writes (section 3) |
+| [tests/](tests/) | Automated checks, with small made-up files in [tests/fixtures/](tests/fixtures/) |
+| [docs/RULES.md](docs/RULES.md) | Every rule in plain English, with the decisions behind it |
+| [docs/QA_LOG.md](docs/QA_LOG.md) | What looked off during the build and how each issue was checked |
+| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Decisions made without enough information, and what to build next |
+| [docs/REDUCING_REVIEW.md](docs/REDUCING_REVIEW.md) | The flagged rows grouped by what would remove each flag |
+| [docs/EXTENDING.md](docs/EXTENDING.md) | For the team taking the tool over: how to extend it, and its built-in limits |
+| [docs/TIME_LOG.md](docs/TIME_LOG.md) | Timestamps for the build |
+| [docs/NOTE_DRAFT.md](docs/NOTE_DRAFT.md) | Draft of the submission note |
