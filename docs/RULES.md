@@ -24,9 +24,17 @@ Principles that apply to every rule:
 ## Mapping each field
 
 **R4: Building.** The building name is looked up in the building table in `mappings.py` (e.g. `LVMS`, `lakeview middle`, `Lakeview MS` → `Lakeview Middle School`). The three target names match `Target_Format.xlsx`.
-- Flag: an unknown name → "Building 'X' is not a recognized building name". Blank → "Building is missing".
+- If the name isn't in the table, a keyword fallback (`BUILDING_KEYWORDS` in `mappings.py`) is tried:
+  - A word starting with "elem", or the word "ES" → Lakeview Elementary School.
+  - "middle" or "MS" → Lakeview Middle School.
+  - "high" or "HS" → Lakeview High School.
+  - Matching is case-insensitive and on whole words, so "LMS", "Estates" and "Highland" don't match.
+  - Names accepted this way are listed in the run summary so they can be added to the table.
+- Flag: no keyword match → "Building 'X' is not a recognized building name". More than one match → "Building 'X' could mean more than one building (...)". Blank → "Building is missing".
+- **Decision:** The alias list stays and is checked first. Keywords are a fallback for spellings it doesn't cover, so a new building spelling on an unseen file doesn't have to be added by hand before the tool can use it.
+- **Why:** The district has three buildings, so a name containing "middle" can only mean one of them. Matching more than one building, or none, is still a guess, so it's flagged. One known limit: a name from outside the district, like "Westlake Middle", would be accepted as Lakeview Middle School. It shows up in the run summary's keyword list, but the row isn't flagged (QA-020).
 
-**R5: Asset type.** The asset type is looked up in the asset type table in `mappings.py` (e.g. `RTU`, `roof top AC`, `RTU (gas/elec)` → `Rooftop Unit`). At startup the tool checks that every target value in the table appears in `Asset_Types.xlsx`, and stops if one doesn't.
+**R5: Asset type.** The accepted asset types are read from `Asset_Types.xlsx` every run, not copied into the code, so an exact accepted name (any case or spacing) is always recognized. Other spellings come from the asset type table in `mappings.py` (e.g. `RTU`, `roof top AC`, `RTU (gas/elec)` → `Rooftop Unit`). At startup the tool checks that every value the table maps to appears in `Asset_Types.xlsx`, and stops if one doesn't.
 - For partner rows, the type comes from the Equipment Description. The tool takes the text before the first comma, removes the Tag value and any "(qty N)" note, and looks up what's left. For example, "Hot Water Boiler B-1, 1,500 MBH" with tag `B-1` becomes "Hot Water Boiler".
 - Flag: a value not in the table → "Asset type 'X' is not in the accepted list; choose the correct type". Blank → "Asset type is missing".
 - **Decision:** These values are deliberately left out of the table, so they get flagged: `fan`, `heater`, `HVAC unit`, `unit`, `Kitchen hood`, `Unit Heater`, plus the partner's `Expansion Tank` and `Plate Heat Exchanger`.
@@ -77,7 +85,7 @@ Principles that apply to every rule:
 **R12: Nameplate or serial missing.** A row whose manufacturer, model, and serial are all blank is flagged: "Nameplate data missing; technician photo IMG_0527.jpg on file", with the file name taken from the Photo column. With no photo: "Nameplate data missing; no photo on file".
 - A row with a blank or placeholder serial (`N/A`, `see schedule`, and the other entries in the serial placeholder list) is flagged "Serial number missing", unless its asset type is on the list of asset types allowed to have no serial in `mappings.py` (currently Electrical Panel only). An unrecognized asset type isn't on the list, so it's flagged too. When the whole nameplate is blank, only the nameplate reason is given, not both.
 - **Decision:** An editable list of asset types allowed to have no serial, starting with Electrical Panel. It replaces a blanket rule that a blank serial on its own is never flagged.
-- **Why:** I didn't know which equipment commonly lacks a serial, so it's an editable list rather than a blanket exception. In this data every row with only the serial missing is an electrical panel (21 rows), which is why the list starts there. Anyone who learns that another type usually has no serial can add it in `mappings.py` without touching the code.
+- **Why:** I didn't know which equipment commonly lacks a serial, so it's an editable list rather than a blanket exception. In this data every row with only the serial missing is an electrical panel (21 rows), which is why the list starts there. Anyone who learns that another type usually has no serial can add it in `mappings.py` without touching the code. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #7.
 
 **R13: Serial that Excel may have rounded.** A serial made only of digits that ends in four or more zeros (e.g. `4430000000`) is flagged: "Serial 4430000000 may have been rounded by Excel; check the photo or nameplate".
 - **Decision:** The check is "all digits", not "stored as a number in Excel".
@@ -85,7 +93,7 @@ Principles that apply to every rule:
 
 **R14: One row describing several units.** A partner Equipment Description with a quantity like "(qty 4)" is flagged: "One row describes 4 units (tag UV-214 to UV-217); each unit needs its own row and serial".
 
-**R15: Notes that affect the row.** A technician note or partner comment containing a keyword from the notes keyword list in `mappings.py` (`replaced`, `abandoned`, `locked out`) is flagged, with the note quoted: "Technician note may affect this row: 'replaced 2016 per custodian'" (or "Partner comment ..."). A second list holds repeat-entry keywords (`2nd pass`, `second pass`, `logged again`). These flag a row only if it was **not** merged into a duplicate by R16: "Technician note says this is a repeat entry, but no matching serial was found: '...'".
+**R15: Notes that affect the row.** A technician note or partner comment containing a keyword from the notes keyword list in `mappings.py` (`replaced`, `abandoned`, `locked out`, `out of service`, `disconnected`, `removed`, `decommissioned`, `inoperable`, `failed`, `leak`, `red tag`) is flagged, with the note quoted: "Technician note may affect this row: 'replaced 2016 per custodian'" (or "Partner comment ..."). A second list holds repeat-entry keywords (`2nd pass`, `second pass`, `logged again`). These flag a row only if it was **not** merged into a duplicate by R16: "Technician note says this is a repeat entry, but no matching serial was found: '...'".
 - **Decision:** Notes are checked against a short keyword list, not ignored. Repeat-entry notes are only flagged on rows that didn't merge.
 - **Why:** Without the check, a row noting the unit was replaced in 2016 would go out as ready with install year 1998. It's a lookup in `mappings.py`, not interpretation: the tool puts the note in front of a person and doesn't act on it. A "2nd pass" note is exactly the problem R16 solves. When the serial matched and the rows merged, the note is already handled. When nothing matched (e.g. a panel with no serial), the note is the only clue that the row is a repeat.
 
@@ -124,4 +132,4 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 **R22: Outputs.** Written to the output folder:
 - `import_ready.csv`: exactly the columns of `Target_Format.xlsx`, in order, with every output row (ready and needs_review).
 - `review_list.csv`: only needs_review rows, with the reason, the source row IDs, and the raw captured values next to the cleaned ones.
-- `run_summary.md`: rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason.
+- `run_summary.md`: rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason. It also lists every value the tool didn't recognize, by field (building, asset type, manufacturer, condition, install year), with the file it came from and the number of input rows, plus every building name accepted by keyword. A specialist can then update `mappings.py` in one pass.

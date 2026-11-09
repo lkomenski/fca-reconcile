@@ -145,6 +145,34 @@ def test_R4_unknown_or_blank_building_is_flagged(raw, reason):
 @pytest.mark.parametrize(
     "raw, expected",
     [
+        ("Lakeview Elementary Bldg A", "Lakeview Elementary School"),
+        ("ES Annex", "Lakeview Elementary School"),
+        ("Middle Sch.", "Lakeview Middle School"),
+        ("Lakeview HS Annex", "Lakeview High School"),
+        ("lakeview HIGH annex", "Lakeview High School"),
+    ],
+)
+def test_R4_keyword_fallback_maps_names_not_in_the_list(raw, expected):
+    assert rc.normalize_building(raw) == (expected, None)
+
+
+def test_R4_name_matching_two_buildings_is_flagged():
+    problem = rc.normalize_building("Elem/Middle Shared Gym")[1]
+    assert problem.reason == (
+        "Building 'Elem/Middle Shared Gym' could mean more than one building "
+        "(Lakeview Elementary School, Lakeview Middle School)"
+    )
+
+
+@pytest.mark.parametrize("raw", ["LMS", "Lakeview Estates", "Highland Annex"])
+def test_R4_keywords_match_whole_words_only(raw):
+    # "LMS" is not the word "MS", "Estates" is not "ES", "Highland" is not "high".
+    assert rc.normalize_building(raw)[1].category == "Building not recognized"
+
+
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
         ("RTU", "Rooftop Unit"),
         ("roof top AC", "Rooftop Unit"),
         ("Rooftop unit", "Rooftop Unit"),
@@ -174,6 +202,16 @@ def test_R5_vague_or_unlisted_asset_type_is_flagged_with_its_value(raw):
 )
 def test_R5_partner_type_taken_from_description(description, tag, expected):
     assert rc.partner_asset_type_text(description, tag) == expected
+
+
+def test_R5_accepted_types_are_read_from_the_file_at_run_time(tmp_path):
+    # A type that exists only in the accepted-types file, not in mappings.py.
+    path = tmp_path / "asset_types.csv"
+    accepted_rows = [["asset_type", "system"]] + [[name, ""] for name in mappings.ASSET_TYPES] + [["Cooling Tower", "HVAC"]]
+    write_csv(path, accepted_rows)
+    lookup = rc.build_asset_type_lookup(rc.read_accepted_asset_types(path))
+    assert rc.normalize_asset_type("cooling tower", lookup) == ("Cooling Tower", None)
+    assert rc.normalize_asset_type("Cooling Tower")[1] is not None  # not known without the file
 
 
 def test_R5_every_mapped_asset_type_is_in_accepted_list():
@@ -369,7 +407,20 @@ def test_R14_row_with_several_units_is_flagged():
 
 @pytest.mark.parametrize(
     "notes, flagged",
-    [("replaced 2016 per custodian", True), ("abandoned in place", True), ("filters dirty", False), (None, False)],
+    [
+        ("replaced 2016 per custodian", True),
+        ("abandoned in place", True),
+        ("Out of Service since May", True),
+        ("disconnected from loop", True),
+        ("decommissioned 2025", True),
+        ("inoperable", True),
+        ("compressor failed", True),
+        ("water leaking at coil", True),
+        ("RED TAG on burner", True),
+        ("unit removed", True),
+        ("filters dirty", False),
+        (None, False),
+    ],
 )
 def test_R15_note_keywords_are_flagged_and_quoted(notes, flagged):
     problem = rc.check_notes(notes, "technician")
@@ -529,6 +580,15 @@ def test_R22_three_outputs_written(tmp_path):
     assert "Row check (R21)" in (tmp_path / "run_summary.md").read_text(encoding="utf-8")
 
 
+def test_R22_summary_lists_every_unrecognized_value_by_field():
+    result = rc.reconcile(REAL_TECHNICIAN, REAL_PARTNER, current_year=YEAR)
+    text = rc.summary_text(result, REAL_TECHNICIAN, REAL_PARTNER)
+    assert "| Manufacturer | MITSUBISHI | technician | 2 |" in text
+    assert "| Asset type | Unit Heater | partner | 3 |" in text
+    assert "| Install year | unknown | technician | 4 |" in text
+    assert "| Condition | 11 | technician | 1 |" in text
+
+
 # --- The unseen file: proves no rule depends on the real rows ----------------
 
 
@@ -547,3 +607,19 @@ def test_UNSEEN_made_up_files_reconcile_with_expected_counts():
     assert "Building 'Lakeview Annex'" in by_ids["technician:11"]["review_reason"]
     assert "Install year 2030 is in the future" in by_ids["technician:11"]["review_reason"]
     assert by_ids["technician:7"]["approximate_year"]
+
+
+def test_UNSEEN_second_file_new_spellings_are_flagged_or_listed():
+    result = rc.reconcile(FIXTURES / "unseen_technician_2.csv", FIXTURES / "unseen_partner.csv", current_year=YEAR)
+    counts = result["counts"]
+    assert (counts["technician_in"], counts["ready"], counts["needs_review"]) == (10, 3, 10)
+    rows = {row["row_ids"][0]: row for row in result["rows"]}
+    assert rows["technician:4"]["values"]["asset_type"] == "Switchgear"  # from Asset_Types.xlsx only
+    assert rows["technician:4"]["status"] == "ready"
+    assert "Manufacturer 'Johnson Controls'" in rows["technician:2"]["review_reason"]
+    assert "Asset type 'Cooling Tower'" in rows["technician:3"]["review_reason"]
+    assert "could mean more than one building" in rows["technician:6"]["review_reason"]
+    # Known limit of the keyword fallback: another school's name with "middle" is accepted.
+    assert rows["technician:9"]["values"]["building"] == "Lakeview Middle School"
+    assert len(result["keyword_buildings"]) == 4
+    assert result["unrecognized"][("manufacturer", "Trane Technologies", "technician")] == 1

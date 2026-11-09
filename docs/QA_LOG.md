@@ -176,3 +176,57 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 - Counts unchanged: 115 ready, 51 needs_review, 35 merged.
 **Fix:** `normalize_location` added. The R8 decision is updated, and the broader location question is recorded in OPEN_QUESTIONS.md #5.
 **Verified by:** `test_R8_room_numbers_standardized` (6 cases), `test_R8_other_locations_kept_as_captured` (5 cases), `test_R8_location_cleaned_inside_a_full_row`; 135 tests pass.
+
+### QA-018 · 2026-11-08 16:47 · Accepted asset types were partly copied into code
+**Rule(s):** R5
+**What looked off:** While confirming that accepted asset types are read from `Asset_Types.xlsx` at run time, the code turned out to read the file only to *check* `mappings.py`. Recognition used the type names typed in `mappings.py` as keys.
+**First theory:** Harmless, since all 17 accepted types were typed in correctly.
+**Cause:** A real gap for unseen data. If FMX added a type to `Asset_Types.xlsx` (say "Cooling Tower"), a technician entry of exactly "Cooling Tower" would still be flagged "not in the accepted list" until someone also edited `mappings.py`.
+**How it was proven:** `grep` showed `ASSET_TYPE_LOOKUP` built only from `mappings.ASSET_TYPES`. Before the fix, `normalize_asset_type("Switchgear")` only worked because of an empty `"Switchgear": []` entry in `mappings.py`.
+**Fix:** `build_asset_type_lookup` adds every name from `Asset_Types.xlsx` to the lookup at run time. The empty `Switchgear` entry was removed from `mappings.py`, since the file now supplies it.
+**Verified by:** `test_R5_accepted_types_are_read_from_the_file_at_run_time` ("Cooling Tower" in a temporary accepted-types file is recognized, and is not recognized without it). Second unseen file: `technician:4` "Switchgear" is ready. FMX output unchanged (166 rows, no cell differs).
+
+### QA-019 · 2026-11-08 16:47 · False alarm: reconcile.py looked twice as long as expected
+**Rule(s):** none (tooling)
+**What looked off:** `grep` placed the summary code at line 1119. The file had been estimated at around 700 lines.
+**First theory:** An earlier `git stash`/`git checkout` or a line-ending change had duplicated part of the file.
+**Cause:** No duplication. The estimate was simply low; docstrings make up much of the file.
+**How it was proven:** `wc -l` gives 1158 lines. `grep "^def " | sort | uniq -d` found no function defined twice. `cat -A` showed no doubled blank lines.
+**Fix:** No change needed.
+**Verified by:** Same commands; 51 unique functions.
+
+### QA-020 · 2026-11-08 16:47 · Building keyword fallback, and its known limit
+**Rule(s):** R4
+**What looked off:** n/a (new rule). The concern was that a keyword fallback would accept names it shouldn't.
+**First theory:** Whole-word matching would prevent false matches like "LMS" → MS, "Estates" → ES and "Highland" → High.
+**Cause:** Confirmed for those three. One false match was found. On the second unseen file, "Westlake Middle", a made-up name for a school outside the district, was accepted as Lakeview Middle School and marked **ready**. The rule as specified can't tell a different school's name from a new spelling of this one.
+**How it was proven:**
+- Second unseen file: 4 names accepted by keyword: "Lakeview Elementary Bldg A", "Middle Sch.", "Lakeview HS Annex", "Westlake Middle".
+- "Elem/Middle Shared Gym" was flagged as matching two buildings. "LMS" was flagged as not recognized.
+- Real FMX file: 0 names fell through to keywords. Every one of the 16 spellings is in the alias list.
+**Fix:** As specified. The limit is made visible rather than hidden: every keyword match is listed in the run summary under "Building names matched by keyword", and it's noted in R4 and the README. Two possible tightenings are left for a decision, not built: require "Lakeview" as well, or mark keyword matches needs_review.
+**Verified by:** `test_R4_keyword_fallback_maps_names_not_in_the_list` (5), `test_R4_name_matching_two_buildings_is_flagged`, `test_R4_keywords_match_whole_words_only` (3), and `test_UNSEEN_second_file_new_spellings_are_flagged_or_listed`, which asserts the Westlake behavior so any change to it is deliberate.
+
+### QA-021 · 2026-11-08 16:47 · New note keywords change nothing on the FMX files
+**Rule(s):** R15
+**What looked off:** 8 keywords were added (`out of service`, `disconnected`, `removed`, `decommissioned`, `inoperable`, `failed`, `leak`, `red tag`). The FMX counts didn't move.
+**First theory:** The keywords weren't being read.
+**Cause:** No bug. The only FMX note containing a new keyword is `technician:53` ("abandoned in place, disconnected from loop"). It was already flagged for "abandoned", and one note produces one reason. No other FMX note or comment contains a new keyword.
+**How it was proven:** On the second unseen file, "red tag on burner", "water leak at coil", "decommissioned 2025" and "out of service" are each flagged with the note quoted. FMX `import_ready.csv` compared to the previous commit: 166 rows, 0 cells differ.
+**Fix:** No change needed.
+**Verified by:** `test_R15_note_keywords_are_flagged_and_quoted` (12 cases, including "leaking", "Out of Service" and "RED TAG" to confirm case and word-ending handling).
+
+### QA-022 · 2026-11-08 16:47 · Run summary lists every unrecognized value
+**Rule(s):** R22
+**What looked off:** n/a (new output). The reason counts in the summary said *how many* rows had an unrecognized manufacturer, but not *which* spellings, so updating `mappings.py` meant reading the whole review list.
+**First theory:** n/a
+**Cause:** n/a
+**How it was proven:** The FMX run lists 18 values:
+- 10 asset types
+- 2 manufacturer spellings: `MITSUBISHI` 2 and `Mitsubishi` 2, the same split as QA-013
+- 2 condition values
+- 4 year values
+
+Values are counted per input row before merging, so a spelling covered by the other source in a merged row still shows up.
+**Fix:** A new section, "Values the tool didn't recognize", with field, value as captured, file and rows, plus "Building names matched by keyword".
+**Verified by:** `test_R22_summary_lists_every_unrecognized_value_by_field`. On the second unseen file the section listed 13 values, including `Johnson Controls`, `Trane Technologies`, `Cooling Tower` and `7/10`.

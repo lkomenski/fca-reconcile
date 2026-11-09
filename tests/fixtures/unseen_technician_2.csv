@@ -1,0 +1,11 @@
+Bldg,Equip Type,Mfr,Model #,Serial #,Yr Installed,Cond (1-10),Location,Notes,Photo,Captured,Tech
+Lakeview Elementary Bldg A,Rooftop Package Unit,Johnson Controls,J10,JC-001,2014,6,Roof,,,2026-11-01,QQ
+LMS,Cooling Tower,BAC,S3E,BAC-77,2009,5,Exterior pad,,,2026-11-01,QQ
+Middle Sch.,Switchgear,Square D,QED-2,SQ-5,2001,4,Main Elec Rm,,,2026-11-01,QQ
+Lakeview HS Annex,Water Heater,Rheem,PROG50,RH-9,'15,7,room 12,red tag on burner,IMG_1.jpg,2026-11-01,QQ
+Elem/Middle Shared Gym,Exhaust Fan,Greenheck,SQ-1,GH-3,2010,5,Gym roof,,,2026-11-01,QQ
+lakeview high school,Make-Up Air Unit,CaptiveAire,A2,CA-8,1990s,8,Kitchen,,,2026-11-01,QQ
+Lakeview Elementary School,Air Handler,Trane Technologies,M1,TT-2,2012,7/10,Mech Rm,water leak at coil,,2026-11-01,QQ
+Westlake Middle,Pump,Taco,1600,TC-4,2011,4,Boiler Rm,,,2026-11-01,QQ
+LVES,Transformer,Eaton,T1,ET-1,2004,6,Elec Rm,decommissioned 2025,,2026-11-01,QQ
+Lakeview Middle,Boiler,Lochinvar,KBN,LO-1,2016,6,Boiler Rm,out of service,,2026-11-01,QQ

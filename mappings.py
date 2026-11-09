@@ -34,9 +34,21 @@ BUILDINGS = {
     ],
 }
 
-# R5: Asset types. Every key must appear in Asset_Types.xlsx; the tool checks
-# this when it starts. Partner descriptions are looked up here too, after the
-# tag and any "(qty N)" are removed (e.g. "Hot Water Boiler").
+# R4: Keyword fallback for building names not listed above. Keywords match
+# whole words, ignoring case; a keyword ending in "*" matches any word that
+# starts with it ("elem*" matches "Elementary"). A name matching no building,
+# or more than one, is flagged.
+BUILDING_KEYWORDS = {
+    "Lakeview Elementary School": ["elem*", "ES"],
+    "Lakeview Middle School": ["middle", "MS"],
+    "Lakeview High School": ["high", "HS"],
+}
+
+# R5: Other spellings of FMX's accepted asset types. The accepted names
+# themselves are read from Asset_Types.xlsx each run, so they don't need to be
+# listed here; every key below must appear in that file (the tool checks this
+# when it starts). Partner descriptions are looked up here too, after the tag
+# and any "(qty N)" are removed (e.g. "Hot Water Boiler").
 # Deliberately NOT listed (see RULES.md R5): fan, heater, HVAC unit, unit,
 # Kitchen hood, Unit Heater, Expansion Tank, Plate Heat Exchanger.
 ASSET_TYPES = {
@@ -58,7 +70,6 @@ ASSET_TYPES = {
     "Water Heater": ["WH", "HWH", "Gas Water Heater"],
     "Backflow Preventer": ["Backflow", "BFP", "RPZ Backflow Preventer"],
     "Electrical Panel": ["Panel", "Panelboard", "Elec Panel"],
-    "Switchgear": [],
     "Transformer": ["XFMR"],
     "Emergency Generator": ["Genset", "Emergency Gen"],
     "Fire Alarm Control Panel": ["Fire Alarm Panel", "FACP"],
@@ -129,6 +140,14 @@ NOTE_KEYWORDS = [
     "replaced",
     "abandoned",
     "locked out",
+    "out of service",
+    "disconnected",
+    "removed",
+    "decommissioned",
+    "inoperable",
+    "failed",
+    "leak",
+    "red tag",
 ]
 
 # R15: Words that mean the row is a repeat entry. Only flagged when the tool

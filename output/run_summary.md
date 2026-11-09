@@ -1,6 +1,6 @@
 # Run summary
 
-Run at 2026-11-08 16:38.
+Run at 2026-11-08 16:46.
 Technician file: `Technician_Capture.csv.xlsx`. Partner file: `Partner_Equipment_List.xlsx`.
 
 | Count | Rows |
@@ -42,3 +42,36 @@ Number of flagged rows with each reason. A row with several problems is counted 
 | Repeat entry not matched | 1 |
 | Condition out of range | 1 |
 | One row describes several units | 1 |
+
+## Values the tool didn't recognize
+
+Each value below was kept as captured and flagged. Rows are input rows, counted before duplicates were merged. Add a value to `mappings.py` only if it has one clear meaning (README section 6).
+
+| Field | Value as captured | File | Rows |
+|---|---|---|---|
+| Asset type | Unit Heater | partner | 3 |
+| Asset type | Expansion Tank | partner | 2 |
+| Asset type | fan | technician | 1 |
+| Asset type | heater | technician | 1 |
+| Asset type | HVAC unit | technician | 1 |
+| Asset type | Kitchen hood | technician | 1 |
+| Asset type | Plate Heat Exchanger | partner | 1 |
+| Asset type | unit | technician | 1 |
+| Asset type | unit heater | technician | 1 |
+| Asset type | Unit Heater | technician | 1 |
+| Manufacturer | MITSUBISHI | technician | 2 |
+| Manufacturer | Mitsubishi | technician | 2 |
+| Condition | 11 | technician | 1 |
+| Condition | Good | technician | 1 |
+| Install year | unknown | technician | 4 |
+| Install year | 19987 | technician | 1 |
+| Install year | 2000s | technician | 1 |
+| Install year | 2031 | technician | 1 |
+
+### Building names matched by keyword
+
+These were not in the building list but contained one building's keyword, so they were accepted. Add them to `BUILDINGS` in `mappings.py` to make the match exact.
+
+| Value as captured | Matched to | Rows |
+|---|---|---|
+| (none) | | 0 |

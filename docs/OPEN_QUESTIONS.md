@@ -23,3 +23,11 @@ Partners describe equipment in their own words ("Inline Circulator", "Plate Heat
 ## 5. Location cleanup beyond room numbers (R8)
 
 The tool standardizes room numbers only (`103`, `Room 103`, `rm103` → `Rm 103`). Everything else is kept as captured, so the same place can still appear several ways: `cafeteria roof`, `Roof - Cafeteria`, `Roof (Cafeteria)`. FMX's own example row shows a cleaned-up location, so a consistent format would likely help. But rewriting free text means guessing, and I'd want an agreed location format first.
+
+## 6. Where the lookups should come from (R5, R6)
+
+Manufacturers and asset types should come from whatever FMX already uses as its source of truth, like its asset library. I didn't know what that was, so the lookups are kept in one file (`mappings.py`) that's easy to swap for a connection later, and each run reports what it didn't recognize. The accepted asset types are already read from FMX's `Asset_Types.xlsx` each run instead of being copied into the code. Only the extra spellings live in `mappings.py`.
+
+## 7. Which equipment commonly has no serial (R12)
+
+I'm not sure which equipment commonly has no serial. The list starts with Electrical Panel only, and anything not on it is flagged, which is the cautious direction: the worst case is a few extra review rows, not missing serials going out as ready. Technicians or Professional Services can tell me which types to add.

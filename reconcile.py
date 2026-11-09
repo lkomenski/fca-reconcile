@@ -43,7 +43,18 @@ FIELDS = [
 # One problem found on a row. "field" says which value it belongs to (None
 # means it is about the whole row), "category" is the short label counted in
 # the run summary, and "reason" is the sentence a data specialist reads.
-Problem = namedtuple("Problem", ["field", "category", "reason"])
+# "value" is set only when the problem is an unrecognized captured value, so
+# the run summary can list every one of them (R22).
+Problem = namedtuple("Problem", ["field", "category", "reason", "value"], defaults=[None])
+
+# Field names as shown in the run summary's unrecognized-values list.
+FIELD_LABELS = {
+    "building": "Building",
+    "asset_type": "Asset type",
+    "manufacturer": "Manufacturer",
+    "condition": "Condition",
+    "install_year": "Install year",
+}
 
 
 class RowAccountingError(Exception):
@@ -85,6 +96,8 @@ def build_lookup(table, table_name):
 
 
 BUILDING_LOOKUP = build_lookup(mappings.BUILDINGS, "BUILDINGS")
+# Spellings from mappings.py only. The accepted names themselves are added at
+# run time from Asset_Types.xlsx by build_asset_type_lookup (R5).
 ASSET_TYPE_LOOKUP = build_lookup(mappings.ASSET_TYPES, "ASSET_TYPES")
 MANUFACTURER_LOOKUP = build_lookup(mappings.MANUFACTURERS, "MANUFACTURERS")
 PARTNER_CONDITION_LOOKUP = {lookup_key(word): score for word, score in mappings.PARTNER_CONDITION.items()}
@@ -245,11 +258,34 @@ def load_partner(path):
 # ---------------------------------------------------------------------------
 
 
+def match_building_keywords(text):
+    """List the buildings whose keywords appear in a building name (R4).
+
+    Keywords come from mappings.BUILDING_KEYWORDS and match whole words only,
+    so "ES" matches "Lakeview ES" but not "Estates". A keyword ending in "*"
+    matches any word starting with it ("elem*" matches "Elementary").
+    """
+    words = re.findall(r"[a-z0-9]+", text.lower())
+    matches = []
+    for building, keywords in mappings.BUILDING_KEYWORDS.items():
+        for keyword in keywords:
+            keyword = keyword.lower()
+            if keyword.endswith("*"):
+                found = any(word.startswith(keyword[:-1]) for word in words)
+            else:
+                found = keyword in words
+            if found and building not in matches:
+                matches.append(building)
+    return matches
+
+
 def normalize_building(raw):
     """Map a building name to one of the three official names (R4).
 
-    Only names listed in mappings.BUILDINGS are changed. An unknown name is
-    kept as typed and flagged.
+    Names in mappings.BUILDINGS are matched first. Anything else falls back
+    to keywords ("middle", "MS", ...), because the district has only three
+    buildings. A name matching no building, or more than one, is kept as
+    typed and flagged.
     """
     text = to_text(raw)
     if not text:
@@ -257,10 +293,21 @@ def normalize_building(raw):
     building = BUILDING_LOOKUP.get(lookup_key(text))
     if building:
         return building, None
+    matches = match_building_keywords(text)
+    if len(matches) == 1:
+        return matches[0], None
+    if len(matches) > 1:
+        return text, Problem(
+            "building",
+            "Building matches more than one building",
+            f"Building '{text}' could mean more than one building ({', '.join(matches)})",
+            text,
+        )
     return text, Problem(
         "building",
         "Building not recognized",
         f"Building '{text}' is not a recognized building name",
+        text,
     )
 
 
@@ -280,22 +327,36 @@ def partner_asset_type_text(description, tag):
     return " ".join(text.split())
 
 
-def normalize_asset_type(raw):
+def build_asset_type_lookup(accepted_types):
+    """Combine FMX's accepted asset types with the spellings in mappings.py (R5).
+
+    The accepted names are read from Asset_Types.xlsx at run time, so a type
+    FMX adds to that file is recognized without editing the code.
+    """
+    lookup = dict(ASSET_TYPE_LOOKUP)
+    for name in accepted_types:
+        lookup[lookup_key(name)] = name
+    return lookup
+
+
+def normalize_asset_type(raw, lookup=ASSET_TYPE_LOOKUP):
     """Map an asset type to a value from the accepted list (R5).
 
-    Only spellings listed in mappings.ASSET_TYPES are changed. Anything else,
-    including vague words like "fan", is kept as typed and flagged.
+    Only accepted names and spellings listed in mappings.ASSET_TYPES are
+    changed. Anything else, including vague words like "fan", is kept as
+    typed and flagged.
     """
     text = to_text(raw)
     if not text:
         return "", Problem("asset_type", "Asset type missing", "Asset type is missing")
-    asset_type = ASSET_TYPE_LOOKUP.get(lookup_key(text))
+    asset_type = lookup.get(lookup_key(text))
     if asset_type:
         return asset_type, None
     return text, Problem(
         "asset_type",
         "Asset type not in accepted list",
         f"Asset type '{text}' is not in the accepted list; choose the correct type",
+        text,
     )
 
 
@@ -318,6 +379,7 @@ def normalize_manufacturer(raw, model, serial):
         "manufacturer",
         "Manufacturer not recognized",
         f"Manufacturer '{text}' is not a recognized spelling; confirm the manufacturer",
+        text,
     )
 
 
@@ -362,7 +424,7 @@ def parse_install_year(raw, current_year):
 
     if year > current_year:
         return None, Problem(
-            "install_year", "Install year in the future", f"Install year {year} is in the future"
+            "install_year", "Install year in the future", f"Install year {year} is in the future", text
         ), False
     if year < 1900:
         return None, unreadable_year(text), False
@@ -375,6 +437,7 @@ def unreadable_year(text):
         "install_year",
         "Install year unreadable",
         f"Install year '{text}' could not be read as a year",
+        text,
     )
 
 
@@ -409,12 +472,14 @@ def convert_condition_10pt(raw):
             "condition",
             "Condition not a number",
             f"Condition '{text}' is not a number on the technician's 1-10 scale",
+            text,
         )
     if not 1 <= score <= 10:
         return None, Problem(
             "condition",
             "Condition out of range",
             f"Condition {text} is outside the technician's 1-10 scale",
+            text,
         )
     return math.ceil(score / 2), None
 
@@ -436,6 +501,7 @@ def convert_condition_text(raw):
         "condition",
         "Condition word not recognized",
         f"Condition '{text}' is not one of {words}",
+        text,
     )
 
 
@@ -547,7 +613,7 @@ def serial_key(serial):
 # ---------------------------------------------------------------------------
 
 
-def clean_record(record, current_year):
+def clean_record(record, current_year, asset_type_lookup=ASSET_TYPE_LOOKUP):
     """Clean every field of one input row and collect its problems.
 
     Each value is cleaned by its own rule. Problems are collected, not acted
@@ -559,12 +625,17 @@ def clean_record(record, current_year):
 
     building, problem = normalize_building(raw["building"])
     problems.append(problem)
+    # Remember names matched by keyword rather than the alias list, so the
+    # run summary can suggest adding them to mappings.BUILDINGS (R4, R22).
+    building_by_keyword = ""
+    if problem is None and lookup_key(to_text(raw["building"])) not in BUILDING_LOOKUP:
+        building_by_keyword = to_text(raw["building"])
 
     if source == "partner":
         asset_text = partner_asset_type_text(raw["description"], raw["tag"])
     else:
         asset_text = raw["asset_type"]
-    asset_type, problem = normalize_asset_type(asset_text)
+    asset_type, problem = normalize_asset_type(asset_text, asset_type_lookup)
     problems.append(problem)
 
     model = to_text(raw["model"])  # R7: as captured, trimmed
@@ -614,6 +685,7 @@ def clean_record(record, current_year):
         "condition_display": condition_display,
         "serial_key": serial_key(serial),
         "repeat_note": repeat_note,
+        "building_by_keyword": building_by_keyword,
     }
 
 
@@ -863,15 +935,28 @@ def read_accepted_asset_types(path):
     return {to_text(row[column]) for row in rows[1:] if column < len(row) and to_text(row[column])}
 
 
-def check_asset_type_mappings(path):
+def check_asset_type_mappings(accepted):
     """Stop if mappings.py uses an asset type FMX does not accept (R5, R12)."""
-    accepted = read_accepted_asset_types(path)
     used = list(mappings.ASSET_TYPES) + list(mappings.ASSET_TYPES_WITHOUT_SERIAL)
     not_accepted = [value for value in used if value not in accepted]
     if not_accepted:
         raise ValueError(
-            f"mappings.py uses asset types not in {Path(path).name}: {', '.join(not_accepted)}"
+            f"mappings.py uses asset types not in the accepted asset types file: {', '.join(not_accepted)}"
         )
+
+
+def unrecognized_values(cleaned_rows):
+    """Count every captured value the tool did not recognize, by field (R22).
+
+    Counted per input row, before merging, so the list shows every spelling
+    that needs a lookup entry, even ones the other source happened to cover.
+    """
+    counts = Counter()
+    for row in cleaned_rows:
+        for problem in row["problems"]:
+            if problem.value is not None:
+                counts[(problem.field, problem.value, row["source"])] += 1
+    return counts
 
 
 def read_target_columns(path):
@@ -894,12 +979,15 @@ def reconcile(technician_path, partner_path, current_year=None, asset_types_path
     """
     if current_year is None:
         current_year = date.today().year
-    check_asset_type_mappings(asset_types_path)
+    # R5: accepted asset types come from the file at run time, not from code.
+    accepted_types = read_accepted_asset_types(asset_types_path)
+    check_asset_type_mappings(accepted_types)
+    asset_type_lookup = build_asset_type_lookup(accepted_types)
 
     technician = load_technician(technician_path)
     partner = load_partner(partner_path)
     records = technician + partner
-    cleaned = [clean_record(record, current_year) for record in records]
+    cleaned = [clean_record(record, current_year, asset_type_lookup) for record in records]
 
     output_rows = []
     for group in find_duplicates(cleaned):
@@ -914,7 +1002,15 @@ def reconcile(technician_path, partner_path, current_year=None, asset_types_path
     counts["duplicate_groups"] = sum(1 for row in output_rows if len(row["members"]) > 1)
     counts["approximate_years"] = sum(1 for row in output_rows if row["approximate_year"])
     counts["partner_years"] = sum(1 for row in output_rows if row["year_from_partner"])
-    return {"rows": output_rows, "counts": counts}
+    keyword_buildings = Counter(
+        (row["building_by_keyword"], row["values"]["building"]) for row in cleaned if row["building_by_keyword"]
+    )
+    return {
+        "rows": output_rows,
+        "counts": counts,
+        "unrecognized": unrecognized_values(cleaned),
+        "keyword_buildings": keyword_buildings,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -1024,7 +1120,49 @@ def summary_text(result, technician_path, partner_path):
         lines.append(f"| {category} | {count} |")
     if not reason_counts:
         lines.append("| (none) | 0 |")
+    lines += unrecognized_section(result)
     return "\n".join(lines) + "\n"
+
+
+def unrecognized_section(result):
+    """List every unrecognized value by field, so the lookups can be updated in one pass (R22)."""
+    lines = [
+        "",
+        "## Values the tool didn't recognize",
+        "",
+        "Each value below was kept as captured and flagged. Rows are input rows, counted before "
+        "duplicates were merged. Add a value to `mappings.py` only if it has one clear meaning "
+        "(README section 6).",
+        "",
+        "| Field | Value as captured | File | Rows |",
+        "|---|---|---|---|",
+    ]
+    unrecognized = result["unrecognized"]
+    field_order = list(FIELD_LABELS)
+    ordered = sorted(
+        unrecognized.items(),
+        key=lambda item: (field_order.index(item[0][0]), -item[1], str(item[0][1]).lower()),
+    )
+    for (field, value, source), count in ordered:
+        lines.append(f"| {FIELD_LABELS[field]} | {value} | {source} | {count} |")
+    if not unrecognized:
+        lines.append("| (none) | | | 0 |")
+
+    lines += [
+        "",
+        "### Building names matched by keyword",
+        "",
+        "These were not in the building list but contained one building's keyword, so they were "
+        "accepted. Add them to `BUILDINGS` in `mappings.py` to make the match exact.",
+        "",
+        "| Value as captured | Matched to | Rows |",
+        "|---|---|---|",
+    ]
+    for (value, building), count in result["keyword_buildings"].most_common():
+        lines.append(f"| {value} | {building} | {count} |")
+    if not result["keyword_buildings"]:
+        lines.append("| (none) | | 0 |")
+    return lines
 
 
 def main(argv=None):

@@ -40,7 +40,7 @@ Three files appear in the `output` folder (it's created if needed, and files fro
 |---|---|
 | `import_ready.csv` | The file to import into FMX. Exactly the columns of `Target_Format.xlsx`. Every piece of equipment appears once, with `status` set to `ready` or `needs_review`. |
 | `review_list.csv` | Only the `needs_review` rows, with the reason, the source row(s) the row came from, and the original captured value next to each cleaned value, so a fix takes one look. |
-| `run_summary.md` | Counts for the run: rows in from each file, rows ready, rows flagged, duplicates merged, and how many rows have each review reason. Open it in any text editor. |
+| `run_summary.md` | Counts for the run: rows in from each file, rows ready, rows flagged, duplicates merged, and how many rows have each review reason. It ends with **"Values the tool didn't recognize"**: every unrecognized building, asset type, manufacturer, condition and year, with counts, plus building names accepted by keyword. Use it to update `mappings.py` in one pass. Open it in any text editor. |
 
 **Source row IDs** in the review list, like `technician:76` or `partner:42`, are the spreadsheet row numbers. Open the original file and go to row 76 to see exactly what was captured. A merged row lists every row it came from, e.g. `technician:100; partner:42`.
 
@@ -57,7 +57,8 @@ Three files appear in the `output` folder (it's created if needed, and files fro
 | Asset type is missing | No equipment type was captured. | Check the notes and photo; the technician may not have reached it. |
 | Manufacturer 'X' is not a recognized spelling | The name isn't in the known list. Plain "Mitsubishi" is left out on purpose because it could be Mitsubishi Electric or Mitsubishi Heavy Industries. | Confirm from the photo or model number. Add a new spelling to `mappings.py` if it's safe. |
 | Manufacturer is missing | A model or serial was captured but no manufacturer. | Fill it in from the photo or model number. |
-| Building 'X' is not a recognized building name / Building is missing | The building name doesn't match any known spelling. | Correct the building. Add the spelling to `mappings.py` if it's a real variant. |
+| Building 'X' is not a recognized building name / Building is missing | The building name doesn't match any known spelling or keyword. | Correct the building. Add the spelling to `mappings.py` if it's a real variant. |
+| Building 'X' could mean more than one building | The name contains keywords for two buildings (e.g. "Elem/Middle Shared Gym"). | Pick the right building. |
 | Install year 'X' could not be read as a year | E.g. "unknown", "2000s", or a typo like "19987". | Find the year on the nameplate or photo, or leave it blank. |
 | Install year YYYY is in the future | Almost always a typo. | Correct it from the nameplate. |
 | Install year differs between sources | Technician and partner years are more than 2 years apart. The technician's year was used. | Check which is right. The partner's year is the year of manufacture. |
@@ -89,6 +90,10 @@ To add a new spelling, find the correct value and add the spelling to its list, 
 ```
 
 The same pattern works for `BUILDINGS`, `MANUFACTURERS`, `ASSET_TYPES`, `ASSET_TYPES_WITHOUT_SERIAL` and the notes keyword lists. Case and extra spaces don't matter, so there's no need to add "ROOF UNIT" separately.
+
+Two things are handled without editing:
+- **Accepted asset types** are read from `Asset_Types.xlsx` every run. If FMX adds a type to that file, an exact match is recognized automatically. `mappings.py` only needs other spellings of it.
+- **Building names** that aren't in `BUILDINGS` fall back to keywords (`BUILDING_KEYWORDS`): "elem…"/"ES", "middle"/"MS", "high"/"HS", as whole words. The run summary lists every name accepted this way. Check that list, because a name from outside the district, like "Westlake Middle", would also match. Add correct names to `BUILDINGS` to make the match exact.
 
 Rules for safe edits:
 - Only add a spelling that can mean one thing. If it could mean two (like "fan"), leave it out and let the tool flag it.
