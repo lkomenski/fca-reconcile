@@ -109,11 +109,11 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 
 **R18: Install year in a merged row.** The technician's install year is used. If it is blank or flagged, the other row's year is used. If both years are present and valid but more than 2 years apart, the technician's year is still used, and the row is flagged: "Install year differs between sources: technician:105 2019, partner:43 2004 (year of manufacture)".
 - **Decision:** A gap of 2 years or less is not flagged. When two technician rows merge, the row captured first counts as the technician side.
-- **Why:** The partner records year of manufacture, so a 1-year gap is expected, not a conflict.
+- **Why:** The partner records year of manufacture, so a 1-year gap is expected, not a conflict. Whose year wins is an open question; see [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #1 and #2.
 
 **R19: Condition in a merged row.** After both ratings are converted to 1–5, the worse (lower) one is filled in. If they differ by 0 or 1, the row is ready. If they differ by 2 or more, the worse rating is still filled in and the row is flagged: "Condition differs between sources: technician:100 4/10 (2 of 5), partner:42 Good (4 of 5); used the lower rating". If one side is blank or flagged, the other side is used.
 - **Decision:** Always the worse rating. A gap of 2 or more is flagged.
-- **Why:** The worse rating is the cautious choice for capital planning. A gap of 2 or more means one person saw something the other didn't, so a person should look.
+- **Why:** The worse rating is the cautious choice for capital planning. A gap of 2 or more means one person saw something the other didn't, so a person should look. Whose rating to trust is an open question; see [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #1.
 
 ## Accounting and outputs
 
