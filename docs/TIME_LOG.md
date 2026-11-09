@@ -24,3 +24,6 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 17:00 | Commit `2f63c45`. Independent review subagent launched (report only). |
 | 17:11 | Review back: row accounting passes, no crashes, 5 wrong-data findings. Logged as QA-027 (commit `3fc631a`); nothing fixed, pending decision. |
 | 17:14 | full_detail.csv (R30) and coverage-by-building table added. FMX counts unchanged; 183 tests pass. |
+| 17:15 | Fixing review findings 2–8 and 12 plus the type-checker warnings (stop at 17:55). Commits `ad24709`, `43e86f8`. |
+| 17:21 | Verification: adversarial files re-run, mutated technician file (117 of 146 rows, shuffled, edited), FMX run twice (identical). FMX: 113 / 53 / 35; 198 tests pass. |
+| 17:22 | QA-030–032 logged; NOTE_DRAFT updated. |

@@ -58,6 +58,7 @@ Principles that apply to every rule:
 - A two-digit year, with or without an apostrophe (`'04`, `98`, `21`): up to the last two digits of the current year becomes 20xx, and anything higher becomes 19xx. Run in 2026, that means 00–26 → 2000s and 27–99 → 1900s.
 - A manufacture date like `Mfg 04/2011` becomes `2011`.
 - A year Excel stored as a date (`2004-01-01`) or a decimal (`2004.0`) becomes `2004`.
+- Flag (probably misread): a date year before 1950, because Excel turns "2004" typed into a date cell into 1905-06-26; and a two-digit year that converts to before 1970 (e.g. `27` → 1927). Reason: "Year may have been misread; check nameplate (captured as '27', which reads as 1927)". The year is left blank.
 - An approximate year (`approx. 2004`, `~2004`, `2004?`, `c. 2012`) keeps the year, stays ready, and is counted in the run summary as "approximate years accepted".
 - Blank stays blank and is not flagged on its own.
 - Flag: a year after the current year (e.g. `2031`) → "Install year 2031 is in the future". Anything else that isn't a clear single year from 1900 on (e.g. `19987`, `2000s`, `unknown`) → "Install year 'X' could not be read as a year".
@@ -88,7 +89,7 @@ Principles that apply to every rule:
 - **Decision:** An editable list of asset types allowed to have no serial, starting with Electrical Panel. It replaces a blanket rule that a blank serial on its own is never flagged.
 - **Why:** I didn't know which equipment commonly lacks a serial, so it's an editable list rather than a blanket exception. In this data every row with only the serial missing is an electrical panel (21 rows), which is why the list starts there. Anyone who learns that another type usually has no serial can add it in `mappings.py` without touching the code. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #7.
 
-**R13: Serial that Excel may have rounded.** A serial made only of digits that ends in four or more zeros (e.g. `4430000000`) is flagged: "Serial 4430000000 may have been rounded by Excel; check the photo or nameplate".
+**R13: Serial that Excel may have damaged.** A serial is flagged "Serial X may have been damaged by Excel; check the photo or nameplate" if it is all digits ending in four or more zeros (`4430000000`), in scientific notation with a sign (`4.43E+09`), or all digits and longer than 15 (Excel keeps only 15 significant digits). A letter E without a sign, as in the real serial `7989E905548`, is not scientific notation.
 - **Decision:** The check is "all digits", not "stored as a number in Excel".
 - **Why:** A CSV file has no number type, and the same damage shows up there. A real serial that happens to end in 0000 gets flagged too, but I'd rather someone spend one quick check than have a wrong serial in the import.
 
@@ -112,7 +113,7 @@ Principles that apply to every rule:
 - `building`, `asset_type`, `manufacturer`, `location`: technician first.
 - `install_year`: R18. `condition`: R19.
 
-A problem stays on the merged row only if it belongs to a value actually used, or isn't about a single field (R14, R15). The review list shows every source row ID in the group.
+A problem stays on the merged row only if it belongs to a value actually used, or isn't about a single field (R14, R15). Two exceptions: a keyword-matched building (R4) always keeps its "confirm" flag, and if the merged manufacturer and model were never captured together on one row, the row is flagged "Manufacturer (...) and model (...) come from different rows; check they belong to the same unit". The review list shows every source row ID in the group.
 - **Decision:** Model and serial come from the partner when present. Location comes from the technician. The other fields default to the technician.
 - **Why:** I take the partner's model and serial because it's the cleaner nameplate copy, typed at a desk from the nameplate. For example, the technician entered `67W-465 53NA` where the partner has `67W46553NA`. I keep the technician's location because the technician was on site at every building, and FMX's example row 2 uses the technician's location (`Roof - Gym`, not the partner's `Roof, Gymnasium`). The other fields default to the technician because it's the primary source and covers all three buildings.
 
@@ -176,3 +177,6 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 Before any output is replaced, the tool checks that `full_detail.csv` and `import_ready.csv` have the same rows in the same order. If they don't, the run stops and the previous outputs are kept (R28).
 - **Decision:** A separate detail file, not extra columns in the import file.
 - **Why:** I didn't want anything captured in the field to be lost just because FMX's import format has no column for it. Keeping it in its own file means the import still matches FMX's format exactly.
+
+**R31: Rows that look identical in the import.** If two or more ready rows have the same values in every import column, each is flagged and every row's notes are quoted: "Looks identical to another row in the import file; tell them apart by notes (technician:33 notes: 'Panel LP-1B'; technician:45 notes: 'Panel LP-1A')".
+- **Why:** Two panels in the same corridor can match on every import column, and the panel name lives only in the notes. Imported as they are, nobody could tell them apart, or tell whether one is a duplicate.

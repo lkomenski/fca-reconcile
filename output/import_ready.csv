@@ -25,11 +25,11 @@ Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,28955725,2004,2,gym ro
 Lakeview Elementary School,Exhaust Fan,,,,,2,Roof (Art Rm),technician,needs_review,Nameplate data missing; technician photo IMG_0458.jpg on file
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,62206952,2004,2,Roof-Wing B,technician,ready,
 Lakeview Elementary School,Make-Up Air Unit,CaptiveAire,A2-D.500-G10,8338595,2016,4,Kitchen,technician,ready,
-Lakeview Elementary School,fan,Greenheck,G-120-VG,60108428,2004,3,Roof - Restrooms,technician,needs_review,Asset type 'fan' is not in the accepted list; choose the correct type
+Lakeview Elementary School,fan,Greenheck,G-120-VG,60108428,2004,3,Roof - Restrooms,technician,needs_review,"Asset type 'fan' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview Elementary School,Split System,Mitsubishi Electric,MSZ-GL12NA,N/A,2021,3,Main Office,technician,needs_review,Serial number missing
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,61436881,2004,2,wing a roof,technician,ready,
 Lakeview Elementary School,Backflow Preventer,Watts,LF909,K335623,2010,3,Water Entry Rm,technician,ready,
-Lakeview Elementary School,heater,A.O. Smith,BTH-199,1613S970920,2012,3,kitchen,technician,needs_review,Asset type 'heater' is not in the accepted list; choose the correct type
+Lakeview Elementary School,heater,A.O. Smith,BTH-199,1613S970920,2012,3,kitchen,technician,needs_review,"Asset type 'heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 1,technician,needs_review,Looks identical to another row in the import file; tell them apart by notes (technician:33 notes: 'Panel LP-1B'; technician:45 notes: 'Panel LP-1A')
 Lakeview Elementary School,Split System,MITSUBISHI,MSZ-GL12NA,3039513,2021,3,IT Closet 112,technician,needs_review,Manufacturer 'MITSUBISHI' is not a recognized spelling; confirm the manufacturer
 Lakeview Elementary School,Water Heater,A.O. Smith,BTH-199,0766A282310,2012,3,Blr Rm,technician,ready,
@@ -37,18 +37,18 @@ Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,corridor 
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,1,Kitchen,technician,ready,
 Lakeview Elementary School,Switchgear,Square D,QED-2,WE7293143,2004,2,main electrical room,technician,ready,
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 2,technician,ready,
-Lakeview Elementary School,,,,,,,Rm 118,technician,needs_review,Asset type is missing; Condition is missing; Nameplate data missing; no photo on file
+Lakeview Elementary School,,,,,,,Rm 118,technician,needs_review,Asset type is missing | Condition is missing | Nameplate data missing; no photo on file
 Lakeview Elementary School,Emergency Generator,Generac,RG048,4586578415,2015,3,Exterior pad - South,technician,ready,
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,3,Elec Rm,technician,ready,
 Lakeview Elementary School,Fire Alarm Control Panel,Notifier,NFS-320,433183,2009,3,main office,technician,ready,
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 1,technician,needs_review,Looks identical to another row in the import file; tell them apart by notes (technician:33 notes: 'Panel LP-1B'; technician:45 notes: 'Panel LP-1A')
-Lakeview Elementary School,Kitchen hood,CaptiveAire,ND-2,8657872,2016,4,kitchen,technician,needs_review,Asset type 'Kitchen hood' is not in the accepted list; choose the correct type
+Lakeview Elementary School,Kitchen hood,CaptiveAire,ND-2,8657872,2016,4,kitchen,technician,needs_review,"Asset type 'Kitchen hood' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview Elementary School,Transformer,Square D,EE75T3H,PU6233668,2004,3,main electrical room,technician,ready,
 Lakeview Middle School,Air Handling Unit,Trane,CSAA021,10Y25238HL,2011,3,Mech Mezzanine,technician,ready,
 Lakeview Middle School,Rooftop Unit,Lennox,LGH156H4,8221N72828,,2,gym roof,technician,ready,
 Lakeview Middle School,Air Handling Unit,,,,,3,Penthouse,technician,needs_review,Nameplate data missing; technician photo IMG_0512.jpg on file
 Lakeview Middle School,Rooftop Unit,Lennox,LGH156H4,7091V67734,2011,2,cafeteria roof,technician,ready,
-Lakeview Middle School,HVAC unit,Lennox,LGH156H4,8062T67877,,3,band rm roof,technician,needs_review,Asset type 'HVAC unit' is not in the accepted list; choose the correct type
+Lakeview Middle School,HVAC unit,Lennox,LGH156H4,8062T67877,,3,band rm roof,technician,needs_review,"Asset type 'HVAC unit' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview Middle School,Boiler,Weil-McLain,88-7,CP8336576,1975,1,Blr Rm,technician,needs_review,"Technician note may affect this row: 'abandoned in place, disconnected from loop'"
 Lakeview Middle School,Chiller,Trane,CGAM110,23R00944JE,2011,3,exterior pad - north,technician,ready,
 Lakeview Middle School,Pump,Bell & Gossett,e-1510 2BC,23S10746,2011,3,boiler room,technician,ready,
@@ -86,15 +86,15 @@ Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,2011,4,Elec Rm,technician,r
 Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,2011,3,kitchen,technician,ready,
 Lakeview Middle School,Split System,Mitsubishi,MSZ-GL12NA,6625103,2019,4,Main Office,technician,needs_review,Manufacturer 'Mitsubishi' is not a recognized spelling; confirm the manufacturer
 Lakeview Middle School,Elevator,Otis,hydrofit,N48451,2011,3,elevator machine rm,technician,ready,
-Lakeview Middle School,unit heater,Trane,UHSA-60,61B18352BN,1998,1,Gym,technician,needs_review,Asset type 'unit heater' is not in the accepted list; choose the correct type
+Lakeview Middle School,unit heater,Trane,UHSA-60,61B18352BN,1998,1,Gym,technician,needs_review,"Asset type 'unit heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview Middle School,Fire Alarm Control Panel,Notifier,NFS2-640,N/A,2011,4,main office,technician,needs_review,Serial number missing
 Lakeview Middle School,Split System,MITSUBISHI,PKA-A24KA7,7887295,2019,4,Server Rm,technician,needs_review,Manufacturer 'MITSUBISHI' is not a recognized spelling; confirm the manufacturer
-Lakeview Middle School,Unit Heater,Trane,UHSA-60,78A32150DL,1998,2,Gym,technician,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
+Lakeview Middle School,Unit Heater,Trane,UHSA-60,78A32150DL,1998,2,Gym,technician,needs_review,"Asset type 'Unit Heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview High School,Rooftop Unit,,,,,2,classroom wing roof,technician,needs_review,Nameplate data missing; technician photo IMG_0611.jpg on file
 Lakeview High School,Rooftop Unit,Trane,YCD150F3,09B24323TL,1998,2,Roof (Classroom Wing),both,ready,
 Lakeview High School,Rooftop Unit,Trane,YSC120E3,64W84118WM,2012,4,Roof - Gym,both,ready,
 Lakeview High School,Rooftop Unit,Trane,YCD150F3,14L13364BH,1998,2,Roof (Science Wing),both,ready,
-Lakeview High School,Rooftop Unit,Trane,YCD150F3,67W46553NA,1998,2,cafeteria roof,both,needs_review,"Condition differs between sources: technician:100 4/10 (2 of 5), partner:42 Good (4 of 5); used the lower rating; Technician note may affect this row: 'RTU-6 heat exchanger cracked, locked out'"
+Lakeview High School,Rooftop Unit,Trane,YCD150F3,67W46553NA,1998,2,cafeteria roof,both,needs_review,"Condition differs between sources: technician:100 4/10 (2 of 5), partner:42 Good (4 of 5); used the lower rating | Technician note may affect this row: 'RTU-6 heat exchanger cracked, locked out'"
 Lakeview High School,Rooftop Unit,Carrier,48TCED12,3284U53676,2019,4,Roof - Admin,both,ready,
 Lakeview High School,Rooftop Unit,Trane,YSC120E3,51B84251YM,2012,4,gym roof,both,ready,
 Lakeview High School,Air Handling Unit,York,XTI-060,WMAM164673,2012,2,Mech Mezzanine,both,ready,
@@ -102,7 +102,7 @@ Lakeview High School,Air Handling Unit,Daikin,CAH017G,FBOU810423,1998,2,mech rm 
 Lakeview High School,Rooftop Unit,Carrier,48TCED12,7568L82128,2019,4,auditorium roof,both,needs_review,"Install year differs between sources: technician:105 2019, partner:43 2004 (year of manufacture)"
 Lakeview High School,Boiler,Lochinvar,FBN1501,1998H042822,2012,4,Boiler Rm,both,ready,
 Lakeview High School,Boiler,Lochinvar,FBN1501,7538J322533,2012,3,Blr Rm,both,ready,
-Lakeview High School,Chiller,York,YLAA0120,WEDM420551,1998,2,Exterior pad - North,both,needs_review,"Condition differs between sources: technician:108 4/10 (2 of 5), partner:12 Good (4 of 5); used the lower rating; Partner comment may affect this row: 'Compressor 2 replaced 2023'"
+Lakeview High School,Chiller,York,YLAA0120,WEDM420551,1998,2,Exterior pad - North,both,needs_review,"Condition differs between sources: technician:108 4/10 (2 of 5), partner:12 Good (4 of 5); used the lower rating | Partner comment may affect this row: 'Compressor 2 replaced 2023'"
 Lakeview High School,Boiler,,,,,3,Boiler Rm,technician,needs_review,Nameplate data missing; technician photo IMG_0627.jpg on file
 Lakeview High School,Pump,Bell & Gossett,Series 80,00K87655,1998,1,Boiler Rm,both,ready,
 Lakeview High School,Air Handling Unit,York,XTI-060,WUBM460841,2012,4,mech mezzanine,both,ready,
@@ -140,9 +140,9 @@ Lakeview High School,Transformer,Square D,EE75T3H,XA9406874,1998,2,Main Elec Rm,
 Lakeview High School,Electrical Panel,Square D,nq442l225,,1998,2,corridor 2,technician,needs_review,"Technician note says this is a repeat entry, but no matching serial was found: 'Panel LP-2A, 2nd pass'"
 Lakeview High School,Transformer,Square D,EE75T3H,AF0832398,2012,,electrical room,technician,needs_review,Condition 11 is outside the technician's 1-10 scale
 Lakeview High School,Elevator,Otis,HydroFit,W66938,,2,Elevator Machine Rm,technician,needs_review,Install year 'unknown' could not be read as a year
-Lakeview High School,unit,Mitsubishi Electric,PKA-A24KA7,2053203,2019,4,server rm,technician,needs_review,Asset type 'unit' is not in the accepted list; choose the correct type
+Lakeview High School,unit,Mitsubishi Electric,PKA-A24KA7,2053203,2019,4,server rm,technician,needs_review,"Asset type 'unit' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview High School,Fire Alarm Control Panel,Notifier,NFS2-640,2771145,,3,Main Office,technician,needs_review,Install year '2000s' could not be read as a year
-Lakeview High School,Split System,Mitsubishi,MSZ-GL12NA,7644930,,4,main office,technician,needs_review,Manufacturer 'Mitsubishi' is not a recognized spelling; confirm the manufacturer; Install year 'unknown' could not be read as a year
+Lakeview High School,Split System,Mitsubishi,MSZ-GL12NA,7644930,,4,main office,technician,needs_review,Manufacturer 'Mitsubishi' is not a recognized spelling; confirm the manufacturer | Install year 'unknown' could not be read as a year
 Lakeview High School,Air Handling Unit,Daikin,CAH017G,FBOU863074,1998,2,Mechanical Room 120,partner,ready,
 Lakeview High School,Boiler,Lochinvar,FBN1501,8916A538488,2012,3,Boiler Room 108,partner,ready,
 Lakeview High School,Exhaust Fan,Greenheck,CUE-099,00644492,1997,2,"Roof, Locker Rooms",partner,ready,
@@ -152,16 +152,16 @@ Lakeview High School,Exhaust Fan,Greenheck,CUE-099,32600908,2012,3,"Roof, Classr
 Lakeview High School,Exhaust Fan,Greenheck,CUE-099,41695297,2012,2,"Roof, Auditorium",partner,ready,
 Lakeview High School,Exhaust Fan,Greenheck,CUE-099,19061862,2012,3,"Roof, Restrooms",partner,ready,
 Lakeview High School,Exhaust Fan,Greenheck,CUE-099,80885376,2012,3,"Roof, Admin",partner,ready,
-Lakeview High School,Expansion Tank,Bell & Gossett,B-200,11K06122,2011,3,Boiler Room 108,partner,needs_review,Asset type 'Expansion Tank' is not in the accepted list; choose the correct type
-Lakeview High School,Expansion Tank,Bell & Gossett,B-200,45B72328,2012,3,Boiler Room 108,partner,needs_review,Asset type 'Expansion Tank' is not in the accepted list; choose the correct type
-Lakeview High School,Plate Heat Exchanger,Bell & Gossett,GPX-P,08M56496,2012,2,Boiler Room 108,partner,needs_review,Asset type 'Plate Heat Exchanger' is not in the accepted list; choose the correct type
+Lakeview High School,Expansion Tank,Bell & Gossett,B-200,11K06122,2011,3,Boiler Room 108,partner,needs_review,"Asset type 'Expansion Tank' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
+Lakeview High School,Expansion Tank,Bell & Gossett,B-200,45B72328,2012,3,Boiler Room 108,partner,needs_review,"Asset type 'Expansion Tank' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
+Lakeview High School,Plate Heat Exchanger,Bell & Gossett,GPX-P,08M56496,2012,2,Boiler Room 108,partner,needs_review,"Asset type 'Plate Heat Exchanger' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview High School,Pump,Bell & Gossett,Series 80,34N76826,1998,1,Boiler Room 108,partner,ready,
 Lakeview High School,Pump,Bell & Gossett,Series 80,56A20037,1997,2,Boiler Room 108,partner,ready,
 Lakeview High School,Pump,Taco,FI2507,923689,2012,3,Boiler Room 108,partner,ready,
 Lakeview High School,Pump,Taco,FI2507,574964,2012,3,Boiler Room 108,partner,ready,
 Lakeview High School,Pump,Taco,11,394281,2012,3,Boiler Room 108,partner,ready,
 Lakeview High School,Rooftop Unit,Trane,YCD150F3,01P33563LL,1998,2,"Roof, Classroom Wing",partner,ready,
-Lakeview High School,Unit Heater,Trane,UHSA-60,86X76332ZV,1998,2,Gymnasium,partner,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
-Lakeview High School,Unit Heater,Trane,UHSA-60,84F98801BU,1997,1,Gymnasium,partner,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
-Lakeview High School,Unit Heater,Trane,UHSA-60,52A86672XK,1997,2,Loading Dock,partner,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
-Lakeview High School,Unit Ventilator,Daikin,AVV-1000,see schedule,2011,4,Classrooms 214-217,partner,needs_review,Serial number missing; One row describes 4 units (tag UV-214 to UV-217); each unit needs its own row and serial
+Lakeview High School,Unit Heater,Trane,UHSA-60,86X76332ZV,1998,2,Gymnasium,partner,needs_review,"Asset type 'Unit Heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
+Lakeview High School,Unit Heater,Trane,UHSA-60,84F98801BU,1997,1,Gymnasium,partner,needs_review,"Asset type 'Unit Heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
+Lakeview High School,Unit Heater,Trane,UHSA-60,52A86672XK,1997,2,Loading Dock,partner,needs_review,"Asset type 'Unit Heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
+Lakeview High School,Unit Ventilator,Daikin,AVV-1000,see schedule,2011,4,Classrooms 214-217,partner,needs_review,Serial number missing | One row describes 4 units (tag UV-214 to UV-217); each unit needs its own row and serial

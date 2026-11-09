@@ -51,10 +51,12 @@ Four files appear in the `output` folder (it's created if needed, and files from
 
 ## 4. Review reasons and what to do
 
+A row with several problems lists them all, separated by ` | `.
+
 | Reason (as it appears in `review_reason`) | What it means | What to do |
 |---|---|---|
 | Nameplate data missing; technician photo IMG_xxxx.jpg on file | Manufacturer, model and serial are all blank. | Open the photo and fill in the nameplate data. If it says "no photo on file", a site visit or the partner list is needed. |
-| Asset type 'X' is not in the accepted list | The type is vague (e.g. "fan", "heater") or not one of FMX's accepted types (e.g. "Unit Heater", "Expansion Tank"). | Pick the correct type from `Asset_Types.xlsx`. If it's a common spelling, add it to `mappings.py` (section 6). |
+| Asset type 'X' is not in FMX's accepted list | The type is vague (e.g. "fan", "heater") or not one of FMX's accepted types (e.g. "Unit Heater", "Expansion Tank"). | Pick the correct type from `Asset_Types.xlsx`. If it's a common spelling, add it to `mappings.py` (section 6). |
 | Asset type is missing | No equipment type was captured. | Check the notes and photo; the technician may not have reached it. |
 | Manufacturer 'X' is not a recognized spelling | The name isn't in the known list. Plain "Mitsubishi" is left out on purpose because it could be Mitsubishi Electric or Mitsubishi Heavy Industries. | Confirm from the photo or model number. Add a new spelling to `mappings.py` if it's safe. |
 | Manufacturer is missing | A model or serial was captured but no manufacturer. | Fill it in from the photo or model number. |
@@ -67,7 +69,10 @@ Four files appear in the `output` folder (it's created if needed, and files from
 | Condition is missing / not a number / outside the 1-10 scale / not one of Good, Fair, Poor, Critical | The condition couldn't be converted to FMX's 1-5 scale. | Ask the technician or partner for the rating, or rate it from the photo and notes. |
 | Condition differs between sources | The two ratings are 2 or more points apart on the 1-5 scale. The lower (worse) rating was used. | Decide which rating is right; one person likely saw a problem the other didn't. |
 | Serial number missing | The serial is blank or a placeholder like "N/A", and the asset type isn't one that usually has no serial. | Read the serial from the photo or nameplate. If this type of equipment normally has no serial, add the type to `ASSET_TYPES_WITHOUT_SERIAL` in `mappings.py`. |
-| Serial NNNN may have been rounded by Excel | An all-number serial ending in 0000; Excel often damages long numbers. | Check the serial against the photo or nameplate. |
+| Serial NNNN may have been damaged by Excel | The serial ends in 0000, is in scientific notation (4.43E+09), or is longer than 15 digits. Excel often damages long numbers. | Check the serial against the photo or nameplate. |
+| Year may have been misread; check nameplate | The year reads as very old (before 1950 from a date cell, or before 1970 from a two-digit year like '27'), which usually means Excel or a typo changed it. | Check the nameplate or photo and type the real year. |
+| Manufacturer (...) and model (...) come from different rows | A merged row got its manufacturer from one row and its model from another, and no single row had both. | Check the photo or nameplate to confirm the model belongs to that manufacturer. |
+| Looks identical to another row in the import file | Two rows have exactly the same values in every import column. | Use the quoted notes (e.g. panel names) to tell them apart, or delete one if it's a true duplicate. |
 | One row describes N units | A single partner row covers several units (e.g. "qty 4"). | Split it into one row per unit with each serial (from the partner's mechanical schedule). |
 | Technician note / Partner comment may affect this row | The note mentions something like "replaced", "abandoned" or "locked out". | Read the quoted note and update the year, condition, or row as needed. |
 | Same serial but different equipment details; possible serial typo | Two rows share a serial, but their manufacturer or model differ, so they weren't merged. | Check both serials against the photos or nameplates; one is probably mistyped. If they really are the same unit, delete one row. |

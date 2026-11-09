@@ -363,3 +363,58 @@ On the FMX files, `import_ready.csv` was compared with the previous commit: 166 
 The total matches `import_ready.csv`. The 2 technician-only merges (`technician:12+44`, `technician:56+92`) count as technician only.
 **Fix:** `coverage_lines` added to the run summary. The limit is recorded in OPEN_QUESTIONS.md #9: finding missing equipment would need mechanical schedules, drawings, or a past assessment.
 **Verified by:** `test_R22_coverage_table_counts_sources_per_building`.
+
+### QA-030 · 2026-11-08 17:21 · Review findings 2–8 and 12 fixed
+**Rule(s):** R4, R9, R13, R17, R20, R31, R5
+**What looked off:** QA-027 findings chosen for fixing: #2 (date-cell year → 1905, ready), #3 (scientific-notation and >15-digit serials pass R13), #4 (brand from one row, model from another), #5 (identical ready rows), #6 (two-digit "27" → 1927, ready), #7 (R4 confirm flag lost on merge), #8 ("; " both inside and between reasons), #12 ("choose the correct type" when none exists).
+**First theory:** n/a (fixing known findings).
+**Cause:** As described in QA-027.
+**How it was proven:** The reviewer's adversarial files were re-run, plus new unit tests:
+- #2: `adv_tech.xlsx` technician:2 (2004 in a date cell, read as 1905-06-26) is now needs_review with "Year may have been misread; check nameplate (captured as '1905-06-26 00:00:00', which reads as 1905)". The CSV text form (`adv_tech.csv` technician:19) is flagged the same way.
+- #3: `4.43E+09` (`adv_tech.csv` technician:2) and `12345678901234569216` (`adv_tech.xlsx` technician:3) are now flagged "may have been damaged by Excel".
+- #4: `adv_tech.xlsx` technician:5 + technician:6 (MIX1) is now needs_review: "Manufacturer (technician:6) and model (technician:5) come from different rows". It flags only when no single row has both values; a normal merge where one row has both stays ready.
+- #5: FMX `technician:33` / `technician:45` are now needs_review, quoting "Panel LP-1B" and "Panel LP-1A". No other ready rows in the FMX output are identical.
+- #6: "27" is flagged. 98 → 1998 and 70 → 1970 are still ready.
+- #7: `adv_tech.xlsx` technician:8 + partner:9 ("Lakeview High School Annex") keeps "matched Lakeview High School by keyword; confirm".
+- #8: reasons are now joined with " | ". Semicolons appear only inside a single reason.
+- #12: "Asset type 'X' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it".
+- FMX counts: 113 ready / 53 needs_review / 35 merged (was 115 / 51 / 35). The only change is the panel pair from #5.
+**Fix:** `misread_year` and the cutoffs `DATE_YEAR_MISREAD_BEFORE = 1950` and `TWO_DIGIT_MISREAD_BEFORE = 1970` (R9); `check_serial_rounded` extended (R13); `check_brand_model_pairing` (R17); `flag_identical_ready_rows` (new R31); keyword building problems carried into `merge_duplicate` (R4); `flag_row` separator (R20); new asset-type wording (R5). Also the type-checker warnings: the guarded import now uses an empty placeholder module instead of `None`, so the ~15 "is not a known attribute of None" warnings are gone, with no change in behavior.
+**Verified by:** `test_R9_probably_misread_years_are_flagged_and_left_blank` (4), `test_R9_real_date_year_after_1950_is_kept`, `test_R13_*` (8 cases), `test_R17_manufacturer_and_model_from_different_rows_is_flagged`, `test_R17_normal_merge_with_both_on_one_row_is_not_flagged`, `test_R31_*` (2), `test_R4_keyword_building_keeps_confirm_flag_after_merge`, `test_R20_every_reason_listed_separated_by_bars`; 198 tests pass.
+**Not fixed, by decision:**
+- #1 is the deferred tag matching. One row of each pair is already flagged, so nothing is imported twice without a person seeing it.
+- #9, #10, #11, #13 and #14 are left as is. They're listed in NOTE_DRAFT.md.
+- The `adv_tech.csv` run still shows #9 ("Serial number also appears at ; check..." on partner:8).
+
+### QA-031 · 2026-11-08 17:21 · [AI error] Scientific-notation check flagged a real serial
+**Rule(s):** R13
+**What looked off:** After the #3 fix, FMX row `technician:125; partner:59` was newly flagged "Serial 7989E905548 may have been damaged by Excel".
+**First theory:** The serial had genuinely been damaged.
+**Cause:** The AI wrote the pattern with the sign optional (`e[+-]?\d+`), so "7989E905548", a normal A.O. Smith serial containing the letter E, matched. Excel's scientific notation always includes the sign (`4.43E+09`, `1E+15`). The reviewer's suggested pattern had the sign; the AI dropped it.
+**How it was proven:** The partner list has the same serial typed independently (`partner:59` 7989E905548), and the other A.O. Smith serials have the same letter-in-the-middle shape (`4171M054224`, `3552Y379731`). Ready count after the bad pattern: 112; after the fix: 113.
+**Fix:** The sign is now required (`e[+-]\d+`). Test cases were added for `7989E905548` (not flagged) and `1E+15` (flagged).
+**Verified by:** `test_R13_all_digit_serial_ending_in_zeros_is_flagged[7989E905548-False]` and `[1E+15-True]`; FMX run: `technician:125; partner:59` is ready again.
+
+### QA-032 · 2026-11-08 17:21 · Verification: adversarial re-run, mutated file, repeat runs
+**Rule(s):** R3, R21, R16, R22
+**What looked off:** n/a. These checks confirm the tool holds up on changed input and gives the same answer every time.
+**First theory:** n/a
+**Cause:** n/a
+**How it was proven:** Script `scratchpad/verify_runs.py`, outside the repo.
+1. **Reviewer's adversarial files** (`adv_tech.csv`, `adv_tech.xlsx`, `adv_tech_offset.xlsx`, each with `adv_partner.csv`): no crash and no traceback in any run.
+   - `adv_tech.csv`: 21 + 10 rows in → 3 ready, 18 needs_review, 10 merged.
+   - `adv_tech.xlsx`: 7 + 10 → 7 ready, 8 needs_review, 2 merged.
+   - The offset file stops with a plain message (finding #11, not fixed).
+2. **Mutated technician file**, built from the FMX technician file:
+   - Rows shuffled; 29 of 146 deleted at random (seed 20261108), leaving 117.
+   - Changes: 5 buildings `Lakeview HS` → `LV High`, 1 `Trane` → `Traine`, 1 `1998` → `'98`, 1 `2012` → `c. 2012`, 1 `UV` → `unit ventilator`.
+   - Result: no crash. 117 + 55 = 172 in = 103 ready + 44 needs_review + 25 merged, and every row ID appears exactly once.
+   - The counts change as expected:
+     - An independent count found 24 technician high school rows with a partner serial; the output has 24 `both` rows.
+     - Partner-only rose from 22 to 31 (55 − 24).
+     - The 25 merged = 24 cross-source pairs + 1 surviving technician pair.
+     - Coverage: elementary 35 (was 45), middle 38 (was 46), high 74.
+     - "Traine" appears as a new unrecognized manufacturer. `LV High` and `'98` were handled silently, since both are known spellings.
+3. **FMX files run twice** into separate folders: `import_ready.csv`, `review_list.csv`, `full_detail.csv` and `run_summary.md` are byte-identical. Caveat: `run_summary.md` includes the run time to the minute, so it matches only when both runs finish in the same minute. The three data files don't depend on time.
+**Fix:** No change needed.
+**Verified by:** The script output above, kept in `scratchpad/verify/`.
