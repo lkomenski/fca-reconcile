@@ -14,4 +14,5 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 16:22 | R9 cutoff tied to the current year; docs switched to a neutral voice. Commit `1d48d91`. |
 | 16:25 | Step 3: mappings.py and reconcile.py written. First full run: 201 in, 117 ready, 49 needs_review, 35 merged. |
 | 16:26 | Output checked against the inspection counts and FMX's three example rows. Commit `953363f`. |
-| 16:31 | Tests written: 118 pass (one or more per rule, the accounting check, the unseen-file run, output columns). Two deliberate bugs confirmed caught. |
+| 16:31 | Tests written: 118 pass (one or more per rule, the accounting check, the unseen-file run, output columns). Two deliberate bugs confirmed caught. Commit `f7d871e`. |
+| 16:32 | README written. All must-haves done, about 47 minutes before the checkpoint. Commit `2a1c31b`. |
