@@ -359,7 +359,7 @@ def test_R31_real_file_panels_lp1a_and_lp1b_are_flagged():
     rows = {row["row_ids"][0]: row for row in result["rows"]}
     assert rows["technician:33"]["status"] == "needs_review"
     assert rows["technician:45"]["status"] == "needs_review"
-    assert result["counts"]["ready"] == 116
+    assert result["counts"]["ready"] == 112  # after R6 evidence (+3) and R32 tag hints (-4)
 
 
 def test_R29_unread_sheets_are_warnings_and_run_continues(tmp_path, capsys):
@@ -416,3 +416,50 @@ def test_R6_real_file_completes_all_four_mitsubishi_rows():
         assert rows[row_id]["values"]["manufacturer"] == "Mitsubishi Electric"
     assert rows["technician:148"]["review_reason"] == "Install year 'unknown' could not be read as a year"
     assert result["automatic"]["manufacturers_from_evidence"] == 4
+
+
+# --- R32: possibly the same unit, by equipment tag (hint, never a merge) -----
+
+
+def test_R32_rows_sharing_a_tag_in_one_building_are_both_flagged():
+    tech = clean(tech_record(95, manufacturer=None, model=None, serial_number=None, notes="RTU-4, nameplate missing"))
+    partner = clean(partner_record(40, description="Rooftop Unit RTU-4", tag="RTU-4", serial_number="01P33563LL"))
+    rows = [rc.flag_row(rc.single_row(tech)), rc.flag_row(rc.single_row(partner))]
+    rc.flag_possible_same_unit(rows)
+    assert "Possibly the same unit as partner:40 (tag RTU-4); don't import twice" in rows[0]["review_reason"]
+    assert rows[1]["review_reason"] == "Possibly the same unit as technician:95 (tag RTU-4); don't import twice"
+    assert len(rows) == 2  # nothing merged
+
+
+def test_R32_note_naming_two_tags_gives_no_hint():
+    tech = clean(tech_record(5, serial_number="S-55", notes="RTU-5 next to RTU-4"))
+    partner = clean(partner_record(2, description="Rooftop Unit RTU-4", tag="RTU-4", serial_number="P-44"))
+    rows = [rc.flag_row(rc.single_row(tech)), rc.flag_row(rc.single_row(partner))]
+    rc.flag_possible_same_unit(rows)
+    assert all(row["status"] == "ready" for row in rows)
+
+
+def test_R32_same_tag_in_different_buildings_gives_no_hint():
+    a = clean(tech_record(37, building="LV Elementary", serial_number=None, asset_type="Panel", notes="Panel KP-1"))
+    b = clean(tech_record(87, building="Lakeview Middle", serial_number=None, asset_type="Panel", notes="Panel KP-1"))
+    rows = [rc.flag_row(rc.single_row(a)), rc.flag_row(rc.single_row(b))]
+    rc.flag_possible_same_unit(rows)
+    assert all(row["status"] == "ready" for row in rows)
+
+
+@pytest.mark.parametrize("notes", ["FI-2507 model swapped", "rtu-4 lowercase", "EF-12A label faded"])
+def test_R32_tag_pattern_is_strict(notes):
+    row = clean(tech_record(2, notes=notes))
+    assert rc.equipment_tags(row) == ({"EF-12A"} if notes.startswith("EF") else set())
+
+
+def test_R32_real_file_links_the_four_twins_and_keeps_merges():
+    result = rc.reconcile(REAL_TECHNICIAN, REAL_PARTNER, current_year=YEAR)
+    hinted = sorted(
+        ", ".join(row["row_ids"]) for row in result["rows"] if "Possibly the same unit" in row["categories"]
+    )
+    assert hinted == sorted([
+        "technician:95", "partner:40", "technician:109", "partner:11",
+        "technician:119", "partner:6", "technician:141", "technician:143",
+    ])
+    assert result["counts"]["merged_away"] == 35  # merge logic untouched

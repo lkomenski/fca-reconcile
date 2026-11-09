@@ -1,6 +1,6 @@
 # Run summary
 
-Run on 2026-11-08 at 17:40.
+Run on 2026-11-08 at 17:47.
 
 - Technician file: `Technician_Capture.csv.xlsx`
 - Partner file: `Partner_Equipment_List.xlsx`
@@ -12,12 +12,12 @@ Run on 2026-11-08 at 17:40.
 | Technician rows in | 146 |
 | Partner rows in | 55 |
 | **Total rows in** | **201** |
-| Rows ready | 116 |
-| Rows flagged (needs_review) | 50 |
+| Rows ready | 112 |
+| Rows flagged (needs_review) | 54 |
 | Rows merged into a duplicate | 35 (in 35 merged rows) |
 | Rows in import_ready.csv | 166 |
 
-Row check (R21): 201 in = 116 ready + 50 needs_review + 35 merged. Passed.
+Row check (R21): 201 in = 112 ready + 54 needs_review + 35 merged. Passed.
 
 ## Coverage by building
 
@@ -58,6 +58,7 @@ Number of flagged rows with each reason. A row with several problems is counted 
 |---|---|
 | Asset type not in accepted list | 13 |
 | Nameplate data missing | 9 |
+| Possibly the same unit | 8 |
 | Install year unreadable | 6 |
 | Condition differs between sources | 5 |
 | Condition missing | 4 |

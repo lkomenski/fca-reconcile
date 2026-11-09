@@ -1253,6 +1253,54 @@ def flag_identical_ready_rows(output_rows):
             flag_row(row)
 
 
+# R32: an equipment tag such as RTU-4, B-3, AHU-2 or LP-2A. Uppercase letters,
+# a dash, 1-3 digits and an optional letter, not part of a longer token, so a
+# model number like FI-2507 or a serial like 67W-465 isn't taken for a tag.
+TAG_PATTERN = re.compile(r"(?<![A-Za-z0-9-])([A-Z]{1,4}-\d{1,3}[A-Z]?)(?![A-Za-z0-9-])")
+
+
+def equipment_tags(row):
+    """The equipment tags on a cleaned row (R32).
+
+    From the partner's Tag column, or from the technician's notes. A note
+    that names two or more tags ("RTU-5 next to RTU-4") can't say which unit
+    the row is, so it gives no tag.
+    """
+    if row["source"] == "partner":
+        return set(TAG_PATTERN.findall(to_text(row["raw"].get("tag"))))
+    tags = set(TAG_PATTERN.findall(to_text(row["raw"].get("notes"))))
+    return tags if len(tags) == 1 else set()
+
+
+def flag_possible_same_unit(output_rows):
+    """Flag rows in one building that share an equipment tag but weren't merged (R32).
+
+    A hint, never a merge: both rows are flagged so a person can confirm
+    they are the same unit and keep only one. Rows already merged by serial
+    are one output row, so they never hint at themselves.
+    """
+    rows_by_tag = {}
+    for row in output_rows:
+        tags = set()
+        for member in row["members"]:
+            tags |= equipment_tags(member)
+        for tag in tags:
+            rows_by_tag.setdefault((row["values"]["building"], tag), []).append(row)
+    for (_, tag), rows in rows_by_tag.items():
+        if len(rows) < 2:
+            continue
+        for row in rows:
+            others = "; ".join(", ".join(other["row_ids"]) for other in rows if other is not row)
+            row["problems"].append(
+                Problem(
+                    None,
+                    "Possibly the same unit",
+                    f"Possibly the same unit as {others} (tag {tag}); don't import twice",
+                )
+            )
+            flag_row(row)
+
+
 def plain_cause(error):
     """A short plain-language description of an unexpected row error (R25)."""
     if isinstance(error, (ValueError, TypeError)):
@@ -1449,6 +1497,7 @@ def reconcile(technician_path, partner_path, current_year=None, asset_types_path
                 output_rows.append(flag_row(output_row))
 
     flag_identical_ready_rows(output_rows)
+    flag_possible_same_unit(output_rows)
 
     counts = check_row_accounting([record["row_id"] for record in records], output_rows)
     counts["technician_in"] = len(technician)

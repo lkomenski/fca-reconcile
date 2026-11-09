@@ -41,6 +41,7 @@ RULE_NAMES = {
     "R29": "warnings",
     "R30": "full detail, nothing captured is lost",
     "R31": "identical ready rows",
+    "R32": "possibly the same unit (tag hint)",
     "UNSEEN": "full run on a made-up unseen file",
 }
 
