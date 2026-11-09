@@ -94,11 +94,46 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 **Fix:** Renumbered (year → R9, technician condition → R10, partner condition → R11, nameplate → R12) and updated the two cross-references, in R6 and R17. Caught before any code used the IDs.
 **Verified by:** The heading list now reads R1 to R22 in order, and both cross-references point to R12.
 
-### QA-011 · 2026-11-08 16:35 · "2nd pass" keyword would have flagged rows the merge already fixed
+### QA-011 · 2026-11-08 16:21 · "2nd pass" keyword would have flagged rows the merge already fixed
 **Rule(s):** R15, R16
 **What looked off:** The approved R15 keyword list included `2nd pass`. `technician:44` ("logged again on 2nd pass") and `technician:92` (same note) both merge by serial with an earlier technician row (`technician:12`, `technician:56`).
 **First theory:** These two merged rows would land in the review list for a duplicate that had already been resolved.
 **Cause:** Confirmed by tracing the rules while writing the code. R15 runs on every row regardless of whether R16 merged it.
 **How it was proven:** Within-technician serial matches from the inspection: `(ES, FBOU734596): [12, 44]` and `(MS, 71N74480): [56, 92]`. Both carry the "2nd pass" note.
 **Fix:** R15 now splits the keywords into two lists. Repeat-entry keywords (`2nd pass`, `second pass`, `logged again`) only flag rows that didn't merge. `technician:143` (LP-2A, no serial) is still flagged.
-**Verified by:** Pending (test `test_R15_repeat_note_only_flagged_when_not_merged`).
+**Verified by:** Full run at 16:25: `technician:44` and `technician:92` are merged and not in the review list; `technician:143` is flagged with "Technician note says this is a repeat entry, but no matching serial was found: 'Panel LP-2A, 2nd pass'". Test: `test_R15_repeat_note_only_flagged_when_not_merged`.
+
+### QA-012 · 2026-11-08 16:26 · [AI error] Time log and QA log had invented timestamps
+**Rule(s):** none (process)
+**What looked off:** The first full run's summary was stamped 16:25, but TIME_LOG already had entries at 16:32 and 16:38 and QA-011 was dated 16:35. Those times were in the future.
+**First theory:** Clock drift between the shell and the run.
+**Cause:** The AI estimated elapsed time instead of reading the clock, and wrote the estimates as if they were real times.
+**How it was proven:** `date` returned 16:26. `git log` shows the two doc commits at 16:19 and 16:22.
+**Fix:** TIME_LOG rewritten from the system clock and git commit times. QA-011 re-dated to 16:21 (between the two commits). From here on, every timestamp comes from `date` or git.
+**Verified by:** Every TIME_LOG entry now matches a commit time or a clock reading taken at that step.
+
+### QA-013 · 2026-11-08 16:26 · [AI error] Inspection report undercounted the "Mitsubishi" rows
+**Rule(s):** R6
+**What looked off:** The inspection report said leaving plain "Mitsubishi" unmapped would affect 2 rows. The run summary shows 4 rows with "Manufacturer not recognized".
+**First theory:** A mapping bug catching a correct spelling.
+**Cause:** The report counted only the `Mitsubishi` spelling. The data also has `MITSUBISHI` (2 rows), which is the same word in a different case and is also unmapped. The tool was right; the report was wrong.
+**How it was proven:** Review list: `technician:34` (MITSUBISHI), `technician:88` (Mitsubishi), `technician:93` (MITSUBISHI), `technician:148` (Mitsubishi). The distinct-value count from the inspection shows `'MITSUBISHI': 2, 'Mitsubishi': 2`.
+**Fix:** No code change needed. The R6 decision affects 4 rows, not 2.
+**Verified by:** Run summary: "Manufacturer not recognized | 4".
+
+### QA-014 · 2026-11-08 16:26 · First full run matches the inspection counts
+**Rule(s):** R3, R9–R19, R21
+**What looked off:** Nothing; this is the check that the first run agrees with the hand counts from Step 1.
+**First theory:** n/a
+**Cause:** n/a
+**How it was proven:**
+- Rows: 146 technician + 55 partner = 201 in; 35 merged (33 cross-source + 2 within technician); 166 out (matches QA-003, QA-004).
+- R19 condition conflicts: 5 (technician 100, 104, 108, 115, 126).
+- R18 year conflicts: 2 (technician 105, 127).
+- R5 asset types flagged: 13 (7 technician + 6 partner).
+- R12 nameplate: 9. R9: 6 unreadable years + 1 future year.
+- R10 condition: 4 missing (the 5th blank, `technician:113`, merged with `partner:14` "Poor", so R19 used the partner rating), 1 text, 1 out of range.
+- R9 approximate years: 8. Partner years used: 23 (22 partner-only rows + `technician:112`/`partner:35`, where the technician year was blank).
+- FMX's three example rows: all three are reproduced, including the exact review reason "Nameplate data missing; technician photo IMG_0527.jpg on file". The one difference is the row 1 location (`cafeteria roof` vs `Roof - Cafeteria`), which is the R8 decision.
+**Fix:** No change needed.
+**Verified by:** `output/run_summary.md` from the 16:25 run.

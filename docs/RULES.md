@@ -17,7 +17,7 @@ Principles that apply to every rule:
 - **Decision:** The files are kept byte-for-byte, with their original names, in `data/`. The loader accepts `.xlsx` or `.csv` based on the real file extension. The files are not renamed or converted.
 - **Why:** FMX sent all four files as `.xlsx`, and the technician file is named `Technician_Capture.csv.xlsx`. Requirement 1 says to use the inputs as provided, and I want the tool to handle a future technician file in either format.
 
-**R2: Load the partner file.** The tool reads the `Equipment` sheet, or the first sheet if no sheet has that name. The header row is found by looking for a row containing `Facility` and `Serial Number`, not by a fixed row number. Below the header, empty rows and note rows with text only in the first column (the footer) are skipped. Every other row is an input row.
+**R2: Load the partner file.** The tool reads the `Equipment` sheet, or the first sheet if no sheet has that name. The header row is found by looking for a row containing `Facility` and `Serial Number`, not by a fixed row number. Below the header, empty rows, note rows with text only in the first column (the footer), and repeated copies of the header are skipped. Every other row is an input row.
 
 **R3: Count rows in.** Rows in, per source, is the number of rows left after R1 and R2. R21 checks this number.
 
