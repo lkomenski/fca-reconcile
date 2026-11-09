@@ -161,4 +161,5 @@ docs/RULES.md     every rule in plain English, with the decisions behind it
 docs/QA_LOG.md    what looked off during the build and how each issue was checked
 docs/TIME_LOG.md  timestamps for the build
 docs/OPEN_QUESTIONS.md  decisions made without enough information, and what to build next
+docs/EXTENDING.md       for the team taking the tool over: how to extend it, and its built-in limits
 ```

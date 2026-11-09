@@ -29,3 +29,4 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 17:22 | QA-030–032 logged; NOTE_DRAFT updated. |
 | 17:28 | "Work done automatically" counts added to the run summary (counts only). Commit below. |
 | 17:28 | docs/REDUCING_REVIEW.md: 53 flags in four buckets (13 learnable, 29 fix at capture, 3 better matching, 9 judgment); about 10 would remain. Linked from NOTE_DRAFT. |
+| 17:30 | docs/EXTENDING.md for the PM and engineering pod: 7 extension points, 12 ranked assumptions. Linked from README and NOTE_DRAFT. |
