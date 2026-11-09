@@ -168,4 +168,4 @@ The tool only stops for problems with a whole file. A problem with a single row 
 | [docs/REDUCING_REVIEW.md](docs/REDUCING_REVIEW.md) | The flagged rows grouped by what would remove each flag |
 | [docs/EXTENDING.md](docs/EXTENDING.md) | For the team taking the tool over: how to extend it, and its built-in limits |
 | [docs/TIME_LOG.md](docs/TIME_LOG.md) | Timestamps for the build |
-| [docs/NOTE_DRAFT.md](docs/NOTE_DRAFT.md) | Draft of the submission note |
+| [docs/NOTE_FINAL.md](docs/NOTE_FINAL.md) | Draft of the submission note |
