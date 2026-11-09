@@ -1,5 +1,3 @@
-# Note draft (max 300 words)
-
 # Note
 
 **What it does.** One command reconciles both files into FMX's import format. On your files: 201 rows in, 112 ready, 54 flagged with plain reasons, 35 duplicates merged. 67% of rows need no one, so a specialist reviews 54 explained rows instead of reconciling two spreadsheets for two days (an estimate I'd measure with a specialist).
