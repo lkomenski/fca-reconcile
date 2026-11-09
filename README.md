@@ -34,13 +34,14 @@ If it prints `STOPPED:`, nothing was changed. The message says what went wrong a
 
 ## 3. What it writes
 
-Three files appear in the `output` folder (it's created if needed, and files from an earlier run are replaced):
+Four files appear in the `output` folder (it's created if needed, and files from an earlier run are replaced):
 
 | File | What it's for |
 |---|---|
 | `import_ready.csv` | The file to import into FMX. Exactly the columns of `Target_Format.xlsx`. Every piece of equipment appears once, with `status` set to `ready` or `needs_review`. |
 | `review_list.csv` | Only the `needs_review` rows, with the reason, the source row(s) the row came from, and the original captured value next to each cleaned value, so a fix takes one look. |
-| `run_summary.md` | Counts for the run: rows in from each file, rows ready, rows flagged, duplicates merged, and how many rows have each review reason. It ends with **"Values the tool didn't recognize"**: every unrecognized building, asset type, manufacturer, condition and year, with counts, plus building names accepted by keyword. Use it to update `mappings.py` in one pass. Open it in any text editor. |
+| `full_detail.csv` | Everything that was captured, including what the import format has no column for (tags, notes, photos, who captured it, the partner's full description). Same rows in the same order as `import_ready.csv`, so you can look up any row's full background. |
+| `run_summary.md` | Counts for the run: rows in from each file, rows ready, rows flagged, duplicates merged, a coverage table showing which buildings each source covered, and how many rows have each review reason. It ends with **"Values the tool didn't recognize"**: every unrecognized building, asset type, manufacturer, condition and year, with counts, plus building names accepted by keyword. Use it to update `mappings.py` in one pass. Open it in any text editor. |
 
 **Source row IDs** in the review list, like `technician:76` or `partner:42`, are the spreadsheet row numbers. Open the original file and go to row 76 to see exactly what was captured. A merged row lists every row it came from, e.g. `technician:100; partner:42`.
 
@@ -119,7 +120,7 @@ At the end it prints one line per rule, e.g. `R10 technician condition 1-10 to 1
 
 ## 8. If something goes wrong
 
-The tool only stops for problems with a whole file. A problem with a single row never stops it; that row goes to the review list instead. When it stops, it lists **every** problem it found at once, and says whether your previous output files are still there. It never leaves half-written outputs: either all three files are replaced, or none are.
+The tool only stops for problems with a whole file. A problem with a single row never stops it; that row goes to the review list instead. When it stops, it lists **every** problem it found at once, and says whether your previous output files are still there. It never leaves half-written outputs: either all four files are replaced, or none are.
 
 | Message starts with | What it means | What to do |
 |---|---|---|
@@ -137,7 +138,7 @@ The tool only stops for problems with a whole file. A problem with a single row 
 | The target format file ... has columns the tool doesn't know how to fill | The target format file isn't FMX's. | Use `data/Target_Format.xlsx`. |
 | The output file '...' is open in another program | An output file is open in Excel, so it can't be replaced. | Close it and run again. |
 | An output file could not be saved | Saving failed partway; the previous files were put back. | Close the files in the output folder and run again. |
-| The row count didn't add up / The tool hit an unexpected problem | Something went wrong inside the tool. | Send `output/error_log.txt` (and the input files, if you can) to a developer. |
+| The detail file didn't line up row for row with the import file / The row count didn't add up / The tool hit an unexpected problem | Something went wrong inside the tool. | Send `output/error_log.txt` (and the input files, if you can) to a developer. |
 
 **Warnings** (the run continues): an extra column the tool doesn't use, or a file whose extension isn't `.xlsx` or `.csv` but still opened. They're printed on screen and listed at the end of `run_summary.md`. Check that you used the right file.
 

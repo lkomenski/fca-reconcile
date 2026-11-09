@@ -228,3 +228,91 @@ def test_R29_extra_column_and_odd_extension_are_warnings(tmp_path, capsys):
     assert "has the extension '.txt', not .xlsx or .csv" in summary
     assert "has a column the tool doesn't use, 'Inspector Notes'" in summary
     assert_plain(text)
+
+
+# --- R30: full_detail.csv keeps everything captured --------------------------
+
+
+def read_csv_rows(path):
+    with open(path, newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def test_R30_full_detail_has_same_rows_in_same_order_as_import(tmp_path, capsys):
+    assert run_main(capsys, REAL_TECHNICIAN, REAL_PARTNER, "--out", tmp_path)[0] == 0
+    target = rc.read_target_columns(rc.DEFAULT_TARGET_FORMAT)
+    import_rows = [[row[c] for c in target] for row in read_csv_rows(tmp_path / "import_ready.csv")]
+    detail_rows = [[row[c] for c in target] for row in read_csv_rows(tmp_path / "full_detail.csv")]
+    assert len(detail_rows) == 166
+    assert detail_rows == import_rows
+
+
+def test_R30_full_detail_keeps_columns_the_import_drops(tmp_path, capsys):
+    run_main(capsys, REAL_TECHNICIAN, REAL_PARTNER, "--out", tmp_path)
+    rows = {row["source_row_ids"]: row for row in read_csv_rows(tmp_path / "full_detail.csv")}
+    merged = rows["technician:100; partner:42"]
+    assert merged["partner_Equipment Description"] == "Rooftop Unit RTU-6, 12.5 ton"  # tonnage kept
+    assert merged["partner_Tag"] == "RTU-6"
+    assert merged["technician_Notes"] == "RTU-6 heat exchanger cracked, locked out"
+    assert merged["technician_Tech"] == "JR"
+    assert merged["partner_System"] == "HVAC"
+    assert rows["partner:54"]["partner_Equipment Description"] == "Unit Ventilators (qty 4)"
+    assert rows["technician:33"]["technician_Notes"] == "Panel LP-1B"
+    # Two technician rows merged: both sides kept, each labelled with its row ID.
+    assert rows["technician:12; technician:44"]["technician_Photo"] == (
+        "technician:12: IMG_0416.jpg | technician:44: IMG_0540.jpg"
+    )
+
+
+def test_R30_raw_value_sits_next_to_each_cleaned_value(tmp_path, capsys):
+    run_main(capsys, REAL_TECHNICIAN, REAL_PARTNER, "--out", tmp_path)
+    with open(tmp_path / "full_detail.csv", newline="", encoding="utf-8") as handle:
+        header = next(csv.reader(handle))
+    for field in rc.FIELDS:
+        assert header[header.index(field) + 1] == f"raw_{field}"
+    row = {r["source_row_ids"]: r for r in read_csv_rows(tmp_path / "full_detail.csv")}["technician:12; technician:44"]
+    assert (row["location"], row["raw_location"]) == ("Rm 103", "technician:12: 103 | technician:44: 103")
+
+
+def test_R30_extra_column_is_kept_in_full_detail(tmp_path, capsys):
+    extra = tmp_path / "tech.csv"
+    rows = list(csv.reader(open(UNSEEN_T, encoding="utf-8")))
+    write_csv(extra, [row + (["Inspector Notes"] if i in (0, 5) else [f"note {i}"]) for i, row in enumerate(rows)])
+    assert run_main(capsys, extra, UNSEEN_P, "--out", tmp_path / "out")[0] == 0
+    detail = read_csv_rows(tmp_path / "out" / "full_detail.csv")
+    assert "note 1" in [row["technician_Inspector Notes"] for row in detail]
+
+
+def test_R30_repeated_heading_is_kept_not_overwritten():
+    assert rc.unique_headings(["Notes", "", "Notes", "Tag"]) == [("Notes", 0), ("Notes (2)", 2), ("Tag", 3)]
+
+
+def test_R30_detail_file_out_of_line_stops_and_keeps_previous_outputs(monkeypatch, tmp_path, capsys):
+    before = seed_outputs(capsys, tmp_path)
+    real_write_full_detail = rc.write_full_detail
+
+    def drops_last_row(result, folder, target_columns):
+        real_write_full_detail(result, folder, target_columns)
+        path = folder / "full_detail.csv"
+        lines = path.read_text(encoding="utf-8").splitlines()
+        path.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
+
+    monkeypatch.setattr(rc, "write_full_detail", drops_last_row)
+    code, text = run_main(capsys, UNSEEN_T, UNSEEN_P, "--out", tmp_path)
+    assert code == 1
+    assert "The detail file didn't line up row for row with the import file" in text
+    assert "were not changed" in text
+    assert_plain(text)
+    assert_outputs_unchanged(tmp_path, before)
+
+
+# --- R22: coverage by building -------------------------------------------------
+
+
+def test_R22_coverage_table_counts_sources_per_building():
+    result = rc.reconcile(REAL_TECHNICIAN, REAL_PARTNER, current_year=YEAR)
+    text = rc.summary_text(result, REAL_TECHNICIAN, REAL_PARTNER)
+    assert "| Lakeview Elementary School | 45 | 0 | 0 | 45 |" in text
+    assert "| Lakeview Middle School | 46 | 0 | 0 | 46 |" in text
+    assert "| Lakeview High School | 20 | 22 | 33 | 75 |" in text
+    assert "| **All buildings** | 111 | 22 | 33 | 166 |" in text

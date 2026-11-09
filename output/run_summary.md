@@ -1,6 +1,6 @@
 # Run summary
 
-Run on 2026-11-08 at 17:00.
+Run on 2026-11-08 at 17:14.
 
 - Technician file: `Technician_Capture.csv.xlsx`
 - Partner file: `Partner_Equipment_List.xlsx`
@@ -18,6 +18,17 @@ Run on 2026-11-08 at 17:00.
 | Rows in import_ready.csv | 166 |
 
 Row check (R21): 201 in = 115 ready + 51 needs_review + 35 merged. Passed.
+
+## Coverage by building
+
+Rows in import_ready.csv per building, by where they came from. Where only one source covered a building, there is nothing to compare against, so missing equipment can't be detected.
+
+| Building | Technician only | Partner only | Both | Total |
+|---|---|---|---|---|
+| Lakeview Elementary School | 45 | 0 | 0 | 45 |
+| Lakeview Middle School | 46 | 0 | 0 | 46 |
+| Lakeview High School | 20 | 22 | 33 | 75 |
+| **All buildings** | 111 | 22 | 33 | 166 |
 
 ## Accepted, but worth knowing
 

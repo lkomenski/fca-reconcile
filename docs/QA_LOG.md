@@ -330,3 +330,36 @@ On the FMX files, `import_ready.csv` was compared with the previous commit: 166 
 - 176 tests pass.
 **Fix:** None yet; report only, as requested. Which findings to fix is a decision for me.
 **Verified by:** Reviewer's report; adversarial inputs kept in `scratchpad/review/adv/` for re-running after any fix.
+
+### QA-028 · 2026-11-08 17:14 · full_detail.csv: nothing captured is dropped
+**Rule(s):** R28, R30
+**What looked off:** `import_ready.csv` has to match FMX's target format exactly, so every column without a place in it was dropped: technician Notes, Photo, Captured, Tech; partner System, Tag, Comments; and details inside the partner description such as "12.5 ton" or "(qty 4)". The review list kept some raw values, but only for flagged rows. The independent review (QA-027, finding 5) also showed why this matters: `technician:33` (Panel LP-1B) and `technician:45` (Panel LP-1A) are identical in the import file, and the panel name exists only in Notes.
+**First theory:** n/a (requested).
+**Cause:** n/a
+**How it was proven:**
+- FMX run: `full_detail.csv` has 166 rows and 43 columns: source row IDs, 11 target columns with 8 raw columns interleaved, 12 `technician_` columns and 11 `partner_` columns.
+- `technician:100; partner:42` keeps `partner_Equipment Description` "Rooftop Unit RTU-6, 12.5 ton", `partner_Tag` "RTU-6", and `technician_Notes` "RTU-6 heat exchanger cracked, locked out".
+- `partner:54` keeps "(qty 4)". `technician:33` keeps "Panel LP-1B".
+- The two-technician merge `technician:12; technician:44` shows both photos, each labelled with its row ID.
+- An extra column (`Inspector Notes`) on a test file appears as `technician_Inspector Notes`.
+- A deliberately broken detail file (last row dropped) stops the run with "The detail file didn't line up row for row with the import file...". Previous outputs are byte-for-byte unchanged and no temporary files are left.
+**Fix:** Added `full_detail.csv` (`write_full_detail`), every original column kept on each record (`make_record`, with `unique_headings` so a repeated heading becomes "Notes (2)" instead of overwriting), and `check_full_detail_matches_import`, run in the temporary folder before any output is replaced. `OUTPUT_FILES` now lists 4 files, so the locked-file check and safe replace cover it. The why is recorded under R30.
+**Verified by:** `test_R30_full_detail_has_same_rows_in_same_order_as_import`, `test_R30_full_detail_keeps_columns_the_import_drops`, `test_R30_raw_value_sits_next_to_each_cleaned_value`, `test_R30_extra_column_is_kept_in_full_detail`, `test_R30_repeated_heading_is_kept_not_overwritten`, `test_R30_detail_file_out_of_line_stops_and_keeps_previous_outputs`. FMX counts unchanged (115 / 51 / 35); 183 tests pass.
+
+### QA-029 · 2026-11-08 17:14 · Coverage by building: two buildings have only one source
+**Rule(s):** R22
+**What looked off:** n/a (new summary table). Requested to show where each source contributed.
+**First theory:** n/a
+**Cause:** n/a. The table makes a data limit visible: the elementary and middle schools have technician data only, so the tool has nothing to cross-check them against.
+**How it was proven:** FMX run, output rows by building:
+
+| Building | Technician only | Partner only | Both | Total |
+|---|---|---|---|---|
+| Elementary | 45 | 0 | 0 | 45 |
+| Middle | 46 | 0 | 0 | 46 |
+| High | 20 | 22 | 33 | 75 |
+| All | 111 | 22 | 33 | 166 |
+
+The total matches `import_ready.csv`. The 2 technician-only merges (`technician:12+44`, `technician:56+92`) count as technician only.
+**Fix:** `coverage_lines` added to the run summary. The limit is recorded in OPEN_QUESTIONS.md #9: finding missing equipment would need mechanical schedules, drawings, or a past assessment.
+**Verified by:** `test_R22_coverage_table_counts_sources_per_building`.

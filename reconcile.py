@@ -6,8 +6,8 @@ Run it like this:
 
 The tool reads both files, cleans every value that has one clear right answer,
 merges equipment that both sources logged, and flags everything else for a
-person. It writes three files to the output folder: import_ready.csv,
-review_list.csv and run_summary.md. Rule IDs (R1, R2, ...) refer to
+person. It writes four files to the output folder: import_ready.csv,
+review_list.csv, run_summary.md and full_detail.csv. Rule IDs (R1, R2, ...) refer to
 docs/RULES.md.
 """
 
@@ -39,7 +39,7 @@ except Exception as import_error:
 HERE = Path(__file__).resolve().parent
 DEFAULT_ASSET_TYPES = HERE / "data" / "Asset_Types.xlsx"
 DEFAULT_TARGET_FORMAT = HERE / "data" / "Target_Format.xlsx"
-OUTPUT_FILES = ["import_ready.csv", "review_list.csv", "run_summary.md"]
+OUTPUT_FILES = ["import_ready.csv", "review_list.csv", "run_summary.md", "full_detail.csv"]
 ERROR_LOG = "error_log.txt"
 KNOWN_EXTENSIONS = (".xlsx", ".xlsm", ".csv")
 
@@ -91,6 +91,10 @@ FIELD_LABELS = {
 
 class RowAccountingError(Exception):
     """Raised when rows in do not equal rows out (R21)."""
+
+
+class OutputMismatchError(Exception):
+    """Raised when full_detail.csv and import_ready.csv don't line up row for row (R30)."""
 
 
 class StopRun(Exception):
@@ -268,16 +272,39 @@ def map_columns(header, column_map, file_label):
     return columns
 
 
-def make_record(source, row_number, row, columns):
-    """Package one input row with its source row ID and its raw values.
+def unique_headings(header):
+    """Give every non-blank heading a unique name, so no column is lost (R30).
+
+    A heading used twice becomes "Notes", "Notes (2)".
+    """
+    names = []
+    for position, name in enumerate(header):
+        if not name:
+            continue
+        unique = name
+        count = 2
+        while unique in [existing for existing, _ in names]:
+            unique = f"{name} ({count})"
+            count += 1
+        names.append((unique, position))
+    return names
+
+
+def make_record(source, row_number, row, columns, header):
+    """Package one input row with its source row ID, its raw values, and every original column.
 
     The row ID (e.g. "technician:42") is the spreadsheet row number, so any
-    output row can be traced back to the row in Excel.
+    output row can be traced back to the row in Excel. "original" keeps
+    every column as captured, including ones the import format has no place
+    for, so full_detail.csv can show them (R30).
     """
     raw = {}
     for field, index in columns.items():
         raw[field] = row[index] if index < len(row) else None
-    return {"row_id": f"{source}:{row_number}", "source": source, "raw": raw}
+    original = {}
+    for name, index in unique_headings(header):
+        original[name] = row[index] if index < len(row) else None
+    return {"row_id": f"{source}:{row_number}", "source": source, "raw": raw, "original": original}
 
 
 def load_technician(path):
@@ -300,7 +327,7 @@ def load_technician(path):
             continue  # R1: empty row
         if texts == header:
             continue  # R1: header pasted in again (second export)
-        records.append(make_record("technician", row_number, row, columns))
+        records.append(make_record("technician", row_number, row, columns, header))
     return records
 
 
@@ -335,7 +362,7 @@ def load_partner(path):
             continue  # R2: footer note, text in the first column only
         if texts == header:
             continue  # R2: repeated header
-        records.append(make_record("partner", index + 1, row, columns))
+        records.append(make_record("partner", index + 1, row, columns, header))
     return records
 
 
@@ -797,6 +824,7 @@ def clean_record(record, current_year, asset_type_lookup=ASSET_TYPE_LOOKUP):
         "serial_key": serial_key(serial),
         "repeat_note": repeat_note,
         "building_by_keyword": building_by_keyword,
+        "original": record.get("original", {}),
     }
 
 
@@ -1118,6 +1146,7 @@ def fallback_row(record, error):
         "serial_key": None,
         "repeat_note": "",
         "building_by_keyword": "",
+        "original": record.get("original", {}),
     }
 
 
@@ -1254,6 +1283,11 @@ def reconcile(technician_path, partner_path, current_year=None, asset_types_path
         "keyword_buildings": keyword_buildings,
         "row_errors": row_errors,
         "warnings": [],
+        # R30: every original column, in file order, for full_detail.csv.
+        "original_columns": {
+            "technician": list(technician[0]["original"]) if technician else [],
+            "partner": list(partner[0]["original"]) if partner else [],
+        },
         "run_at": datetime.now(),
         "files": {
             "Technician file": Path(technician_path).name,
@@ -1325,6 +1359,67 @@ def write_review_list(result, folder):
             writer.writerow(line)
 
 
+def original_value(output_row, source, column):
+    """One original column from one source, for full_detail.csv (R30).
+
+    If several rows from the same source were merged, each value is shown
+    with its row ID, so nothing from either row is lost.
+    """
+    members = [member for member in output_row["members"] if member["source"] == source]
+    if len(members) == 1:
+        return to_text(members[0]["original"].get(column))
+    parts = []
+    for member in members:
+        text = to_text(member["original"].get(column))
+        if text:
+            parts.append(f"{member['row_id']}: {text}")
+    return " | ".join(parts)
+
+
+def write_full_detail(result, folder, target_columns):
+    """Write full_detail.csv: every output row with every original column from both sources (R30).
+
+    Same rows, in the same order, as import_ready.csv. The target columns
+    come first, each cleaned value followed by its raw value, then every
+    original column, prefixed technician_ or partner_.
+    """
+    original_columns = result["original_columns"]
+    header = ["source_row_ids"]
+    for column in target_columns:
+        header.append(column)
+        if column in FIELDS:
+            header.append(f"raw_{column}")
+    header += [f"technician_{name}" for name in original_columns["technician"]]
+    header += [f"partner_{name}" for name in original_columns["partner"]]
+    with open(Path(folder) / "full_detail.csv", "w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(header)
+        for row in result["rows"]:
+            cells = dict(row["values"])
+            cells.update(source=row["source"], status=row["status"], review_reason=row["review_reason"])
+            line = ["; ".join(row["row_ids"])]
+            for column in target_columns:
+                line.append(format_cell(cells[column]))
+                if column in FIELDS:
+                    line.append(raw_value(row, column))
+            line += [original_value(row, "technician", name) for name in original_columns["technician"]]
+            line += [original_value(row, "partner", name) for name in original_columns["partner"]]
+            writer.writerow(line)
+
+
+def check_full_detail_matches_import(folder, target_columns):
+    """Stop if full_detail.csv and import_ready.csv don't have the same rows in the same order (R30)."""
+    with open(Path(folder) / "import_ready.csv", newline="", encoding="utf-8") as handle:
+        import_rows = [[row[column] for column in target_columns] for row in csv.DictReader(handle)]
+    with open(Path(folder) / "full_detail.csv", newline="", encoding="utf-8") as handle:
+        detail_rows = [[row[column] for column in target_columns] for row in csv.DictReader(handle)]
+    if import_rows != detail_rows:
+        raise OutputMismatchError(
+            f"full_detail.csv has {len(detail_rows)} rows and import_ready.csv has {len(import_rows)}, "
+            "or their rows differ"
+        )
+
+
 def write_outputs(result, out_dir, target_columns, technician_path, partner_path):
     """Write the three outputs without ever leaving a half-written set (R22, R28).
 
@@ -1338,6 +1433,8 @@ def write_outputs(result, out_dir, target_columns, technician_path, partner_path
     try:
         write_import_file(result, temp_dir, target_columns)
         write_review_list(result, temp_dir)
+        write_full_detail(result, temp_dir, target_columns)
+        check_full_detail_matches_import(temp_dir, target_columns)
         (temp_dir / "run_summary.md").write_text(
             summary_text(result, technician_path, partner_path), encoding="utf-8"
         )
@@ -1391,6 +1488,9 @@ def summary_text(result, technician_path, partner_path):
         "",
         f"Row check (R21): {rows_in} in = {counts['ready']} ready + {counts['needs_review']} "
         f"needs_review + {counts['merged_away']} merged. Passed.",
+    ]
+    lines += coverage_lines(result)
+    lines += [
         "",
         "## Accepted, but worth knowing",
         "",
@@ -1420,6 +1520,44 @@ def summary_text(result, technician_path, partner_path):
             "Technical details are in error_log.txt."
         )
     return "\n".join(lines) + "\n"
+
+
+def coverage_lines(result):
+    """A table of output rows per building: technician only, partner only, and both (R22).
+
+    It shows where only one source covered a building. In that case the tool
+    has nothing to compare against, so it can't tell what equipment is missing.
+    """
+    buildings = list(mappings.BUILDINGS)
+    for row in result["rows"]:
+        building = row["values"]["building"] or "(no building)"
+        if building not in buildings:
+            buildings.append(building)
+    counts = {building: Counter() for building in buildings}
+    for row in result["rows"]:
+        counts[row["values"]["building"] or "(no building)"][row["source"]] += 1
+    lines = [
+        "",
+        "## Coverage by building",
+        "",
+        "Rows in import_ready.csv per building, by where they came from. Where only one source covered a "
+        "building, there is nothing to compare against, so missing equipment can't be detected.",
+        "",
+        "| Building | Technician only | Partner only | Both | Total |",
+        "|---|---|---|---|---|",
+    ]
+    totals = Counter()
+    for building in buildings:
+        row_counts = counts[building]
+        total = sum(row_counts.values())
+        totals.update(row_counts)
+        lines.append(
+            f"| {building} | {row_counts['technician']} | {row_counts['partner']} | {row_counts['both']} | {total} |"
+        )
+    lines.append(
+        f"| **All buildings** | {totals['technician']} | {totals['partner']} | {totals['both']} | {sum(totals.values())} |"
+    )
+    return lines
 
 
 def unrecognized_section(result):
@@ -1732,6 +1870,12 @@ def main(argv=None):
         write_outputs(result, out_dir, target_columns, args.technician, args.partner)
     except StopRun as stop:
         return report_stop(stop.problems, stop.details, out_dir, args.debug)
+    except OutputMismatchError:
+        message = (
+            "The detail file didn't line up row for row with the import file, so no output files were replaced. "
+            "This is a problem in the tool, not in your files. Send error_log.txt to a developer."
+        )
+        return report_stop([message], traceback.format_exc(), out_dir, args.debug)
     except RowAccountingError:
         message = (
             "The row count didn't add up, so the run was stopped to avoid losing equipment rows. "
@@ -1765,7 +1909,7 @@ def main(argv=None):
         f"Ready: {counts['ready']}. Needs review: {counts['needs_review']}. "
         f"Merged into duplicates: {counts['merged_away']}."
     )
-    print(f"Wrote import_ready.csv, review_list.csv and run_summary.md to {out_dir.resolve()}")
+    print(f"Wrote import_ready.csv, review_list.csv, run_summary.md and full_detail.csv to {out_dir.resolve()}")
     if result["row_errors"]:
         print(
             f"{len(result['row_errors'])} row(s) could not be processed automatically; they are in the review list. "

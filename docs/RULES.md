@@ -133,7 +133,8 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 **R22: Outputs.** Written to the output folder:
 - `import_ready.csv`: exactly the columns of `Target_Format.xlsx`, in order, with every output row (ready and needs_review).
 - `review_list.csv`: only needs_review rows, with the reason, the source row IDs, and the raw captured values next to the cleaned ones.
-- `run_summary.md`: the run date and time and the input file names; rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason. It also lists every value the tool didn't recognize, by field (building, asset type, manufacturer, condition, install year), with the file it came from and the number of input rows, plus every building name accepted by keyword. A specialist can then update `mappings.py` in one pass.
+- `full_detail.csv`: see R30.
+- `run_summary.md`: the run date and time and the input file names; a coverage table of output rows per building (technician only, partner only, both); rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason. It also lists every value the tool didn't recognize, by field (building, asset type, manufacturer, condition, install year), with the file it came from and the number of input rows, plus every building name accepted by keyword. A specialist can then update `mappings.py` in one pass.
 
 ## Checks across rows
 
@@ -157,8 +158,21 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 
 **R27: Plain-language messages.** Every stop message says what went wrong, which file or column, and exactly what to do next. No Python errors are shown on screen. The full technical error is saved to `error_log.txt` in the output folder for a developer; `--debug` also shows it on screen. A successful run removes an old `error_log.txt`, so it can't be mistaken for a current problem, unless rows from this run couldn't be processed.
 
-**R28: Never leave broken output.** The three outputs are written to a temporary folder first. Only after all three are complete are the old files moved aside and replaced. If anything fails, the old files are put back and the temporary files are deleted. Every stop message says whether the previous output files are still there.
+**R28: Never leave broken output.** The four outputs are written to a temporary folder first. Only after all four are complete, and the R30 row check passes, are the old files moved aside and replaced. If anything fails, the old files are put back and the temporary files are deleted. Every stop message says whether the previous output files are still there.
 
 **R29: Warnings don't stop the run.** An extra column the tool doesn't use, or an input file with an unfamiliar extension that still opens, is a warning. Warnings are printed on screen and listed under "Warnings" in the run summary, and the run continues. Columns that are expected but unused (`Captured`, `Tech`, `System`) are listed in `mappings.py` and don't produce warnings.
 - **Decision:** Column names are not mapped flexibly. A file whose headings differ from the expected ones stops with a message listing the missing columns and the columns found.
 - **Why:** See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #8. The exercise says unseen files will be in the same format, and I chose a small tool that works over a bigger one that might not.
+
+## Keeping everything captured
+
+**R30: No data lost in ingestion.** `import_ready.csv` stays exactly in FMX's target format. A fourth output, `full_detail.csv`, keeps everything else:
+- One row per output row, in the same order as `import_ready.csv`.
+- The source row IDs, then every target column, with each cleaned value followed by its raw captured value (`building`, `raw_building`, ...).
+- Every original column from both sources, as captured, prefixed `technician_` or `partner_`. That includes columns the import has no place for: Tag, Notes, Photo, Tech, Captured, System, Comments, any extra column, and the full partner description with details like tonnage or "qty 4".
+- A merged row keeps both sides. When two rows from the same source merge, each value is labelled with its row ID.
+- A heading that appears twice is kept as "Notes" and "Notes (2)".
+
+Before any output is replaced, the tool checks that `full_detail.csv` and `import_ready.csv` have the same rows in the same order. If they don't, the run stops and the previous outputs are kept (R28).
+- **Decision:** A separate detail file, not extra columns in the import file.
+- **Why:** I didn't want anything captured in the field to be lost just because FMX's import format has no column for it. Keeping it in its own file means the import still matches FMX's format exactly.

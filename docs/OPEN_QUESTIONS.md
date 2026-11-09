@@ -37,3 +37,7 @@ I'm not sure which equipment commonly has no serial. The list starts with Electr
 Different sources will name columns differently. Rather than guessing, or growing a list of headings in code, the next version should write out a column-map file when it meets headings it doesn't recognize. A person matches them to fields once per new source format, and the tool reuses that map automatically. The condition scale would be set in the same file, because guessing it would corrupt every rating: a "4" means something very different on a 1–5 scale than on a 1–10 scale.
 
 I didn't build it now. The exercise says unseen files will be in the same format, and I chose a small tool that works over a bigger one that might not. For now, a file with different column names stops with a clear message listing the missing columns and the columns it found.
+
+## 9. Missing equipment where only one source exists (R22)
+
+The tool can't tell what equipment is missing where only one source exists: here, the elementary and middle schools, which only the technician covered (the run summary's coverage table shows 45 and 46 technician-only rows, 0 partner or both). At the high school, the partner list is a second source to compare against. Elsewhere, a unit the technician didn't reach just isn't in the data. Finding those gaps would mean comparing against mechanical schedules, drawings, or a past assessment.

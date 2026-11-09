@@ -21,3 +21,6 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 16:38 | R8 room-number cleanup: 16 locations standardized, counts unchanged, 135 tests pass. Commit `c8beb6b`. |
 | 16:47 | Unseen-file hardening: unrecognized-values summary, building keyword fallback, accepted asset types read at run time, 8 note keywords, second unseen file. FMX counts unchanged; 155 tests pass. Commit `e5d6b7d`. |
 | 16:59 | Keyword buildings → needs_review; graceful failure (file checks, plain messages, error log, safe outputs, row errors, warnings); serial checks across rows; years as dates; column-map idea scoped out; NOTE_DRAFT started. FMX counts unchanged; 176 tests pass. |
+| 17:00 | Commit `2f63c45`. Independent review subagent launched (report only). |
+| 17:11 | Review back: row accounting passes, no crashes, 5 wrong-data findings. Logged as QA-027 (commit `3fc631a`); nothing fixed, pending decision. |
+| 17:14 | full_detail.csv (R30) and coverage-by-building table added. FMX counts unchanged; 183 tests pass. |

@@ -39,6 +39,7 @@ RULE_NAMES = {
     "R27": "plain messages and error log",
     "R28": "never leave broken output",
     "R29": "warnings",
+    "R30": "full detail, nothing captured is lost",
     "UNSEEN": "full run on a made-up unseen file",
 }
 
