@@ -192,7 +192,7 @@ def test_R5_known_asset_types_are_mapped(raw, expected):
 def test_R5_vague_or_unlisted_asset_type_is_flagged_with_its_value(raw):
     value, problem = rc.normalize_asset_type(raw)
     assert value == raw
-    assert problem.reason == f"Asset type '{raw}' is not in the accepted list; choose the correct type"
+    assert problem.reason == f"Asset type '{raw}' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 
 
 @pytest.mark.parametrize(
@@ -567,10 +567,10 @@ def test_R19_blank_technician_condition_uses_partner_rating():
 # --- R20 - R22: status, accounting, outputs ----------------------------------
 
 
-def test_R20_every_reason_listed_separated_by_semicolons():
+def test_R20_every_reason_listed_separated_by_bars():
     row = rc.flag_row(rc.single_row(clean(tech_record(asset_type=None, condition=None, manufacturer=None, model=None, serial_number=None))))
     assert row["status"] == "needs_review"
-    assert row["review_reason"] == "Asset type is missing; Condition is missing; Nameplate data missing; no photo on file"
+    assert row["review_reason"] == "Asset type is missing | Condition is missing | Nameplate data missing; no photo on file"
 
 
 def test_R20_clean_row_is_ready_with_blank_reason():

@@ -6,7 +6,7 @@ Last updated 2026-11-08.
 
 Principles that apply to every rule:
 - A value is auto-fixed only when it matches a known entry in `mappings.py` exactly, ignoring case and extra spaces. Anything new or ambiguous is flagged, never guessed.
-- A flagged row still appears in the import file, with `status = needs_review` and a plain-English `review_reason`. A row with more than one problem lists every reason, separated by "; ".
+- A flagged row still appears in the import file, with `status = needs_review` and a plain-English `review_reason`. A row with more than one problem lists every reason, separated by " | " (a semicolon can appear inside one reason, so it is not used between reasons).
 - Every row keeps its source row ID (`technician:42`, `partner:7`): the spreadsheet row number as shown in Excel.
 
 ---
@@ -36,7 +36,7 @@ Principles that apply to every rule:
 
 **R5: Asset type.** The accepted asset types are read from `Asset_Types.xlsx` every run, not copied into the code, so an exact accepted name (any case or spacing) is always recognized. Other spellings come from the asset type table in `mappings.py` (e.g. `RTU`, `roof top AC`, `RTU (gas/elec)` → `Rooftop Unit`). At startup the tool checks that every value the table maps to appears in `Asset_Types.xlsx`, and stops if one doesn't.
 - For partner rows, the type comes from the Equipment Description. The tool takes the text before the first comma, removes the Tag value and any "(qty N)" note, and looks up what's left. For example, "Hot Water Boiler B-1, 1,500 MBH" with tag `B-1` becomes "Hot Water Boiler".
-- Flag: a value not in the table → "Asset type 'X' is not in the accepted list; choose the correct type". Blank → "Asset type is missing".
+- Flag: a value not in the table → "Asset type 'X' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it". Blank → "Asset type is missing".
 - **Decision:** These values are deliberately left out of the table, so they get flagged: `fan`, `heater`, `HVAC unit`, `unit`, `Kitchen hood`, `Unit Heater`, plus the partner's `Expansion Tank` and `Plate Heat Exchanger`.
 - **Why:** "Fan" could be a supply fan or an exhaust fan, and "heater" could be a water heater or a unit heater. Unit Heater, Expansion Tank, and Plate Heat Exchanger aren't in FMX's accepted list at all. Picking one would be a guess.
 
@@ -126,7 +126,7 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 
 ## Accounting and outputs
 
-**R20: Status and reasons.** A row with any reason from the rules above gets `status = needs_review`, with every reason joined by "; ". A row with no reasons gets `status = ready` and a blank `review_reason`.
+**R20: Status and reasons.** A row with any reason from the rules above gets `status = needs_review`, with every reason joined by " | ". A row with no reasons gets `status = ready` and a blank `review_reason`.
 
 **R21: Row accounting.** Rows in (R3) must equal rows ready + rows needs_review + rows merged away. "Merged away" counts the extra rows folded into a duplicate, so a group of 2 counts as 1. Every input row ID must also appear in exactly one output row. If either check fails, the tool stops with an error and writes nothing, so a lost row can't go unnoticed.
 

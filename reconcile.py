@@ -482,7 +482,7 @@ def normalize_asset_type(raw, lookup=ASSET_TYPE_LOOKUP):
     return text, Problem(
         "asset_type",
         "Asset type not in accepted list",
-        f"Asset type '{text}' is not in the accepted list; choose the correct type",
+        f"Asset type '{text}' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it",
         text,
     )
 
@@ -1095,7 +1095,7 @@ def flag_row(output_row):
             reasons.append(problem.reason)
             categories.append(problem.category)
     output_row["status"] = "needs_review" if reasons else "ready"
-    output_row["review_reason"] = "; ".join(reasons)
+    output_row["review_reason"] = " | ".join(reasons)
     output_row["categories"] = categories
     output_row["row_ids"] = [row["row_id"] for row in output_row["members"]]
     return output_row
