@@ -137,3 +137,15 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 - FMX's three example rows: all three are reproduced, including the exact review reason "Nameplate data missing; technician photo IMG_0527.jpg on file". The one difference is the row 1 location (`cafeteria roof` vs `Roof - Cafeteria`), which is the R8 decision.
 **Fix:** No change needed.
 **Verified by:** `output/run_summary.md` from the 16:25 run.
+
+### QA-015 · 2026-11-08 16:30 · All 118 tests passed on the first run, so the tests were checked to confirm they can fail
+**Rule(s):** R9, R10
+**What looked off:** The first `pytest` run passed every test (118 of 118). A suite that has never failed hasn't shown it can catch anything.
+**First theory:** Some tests might be too loose to catch a real mistake.
+**Cause:** No problem found. Two deliberate bugs were each caught.
+**How it was proven:**
+- Changed R10's `math.ceil(score / 2)` to `round(score / 2)`: 3 R10 cases failed (Python rounds 0.5, 2.5 and 4.5 down to the even number, so scores 1, 5 and 9 converted wrong).
+- Changed R9's cutoff from `current_year % 100` to a fixed `26`: `test_R9_two_digit_cutoff_follows_the_current_year` failed.
+- Both files were restored with `git checkout -- reconcile.py`.
+**Fix:** No change needed. A side lesson: `round()` would have been a quiet bug for scores 1, 5 and 9. `math.ceil` is the right call for "half, rounded up".
+**Verified by:** `pytest`: 118 passed after the restore.

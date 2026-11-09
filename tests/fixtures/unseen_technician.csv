@@ -1,0 +1,11 @@
+Bldg,Equip Type,Mfr,Model #,Serial #,Yr Installed,Cond (1-10),Location,Notes,Photo,Captured,Tech
+Lakeview High School,Boiler,Weil-McLain,CGa-5,AB-100 200,2015,6,Boiler Room 2,,,2026-10-01,ZZ
+LVMS,exhaust fan,GREENHECK,SQ-80,G555,'09,9,Roof North,,,2026-10-01,ZZ
+Lakeview Elem,supply fan,Greenheck,SQ-90,G777,2010,4,Roof South,,,2026-10-01,ZZ
+,,,,,,,,,,,
+Bldg,Equip Type,Mfr,Model #,Serial #,Yr Installed,Cond (1-10),Location,Notes,Photo,Captured,Tech
+Lakeview Elementary,Transformer,Square D,T-1,X9,approx. 1999,7,Elec Room,,,2026-10-02,YY
+LV High,Pump,Taco,1600,P-42,2001,2,Pump Rm,,,2026-10-02,YY
+Lakeview Middle School,Unit Ventilator,,,,,5,Rm 300,see photo,IMG_9001.jpg,2026-10-02,YY
+LVMS,Exhaust Fan,Greenheck,SQ-80,G-555,2009,8,Roof North,logged again on 2nd pass,,2026-10-02,YY
+Lakeview Annex,Boiler,Lochinvar,KBN,L1,2030,3,Boiler Rm,,,2026-10-02,YY
