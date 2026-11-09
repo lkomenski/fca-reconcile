@@ -434,7 +434,8 @@ def check_nameplate(manufacturer, model, serial, photo):
     """Flag a row whose nameplate fields are all blank (R12).
 
     The reason names the technician's photo file so the specialist can read
-    the nameplate from it. A blank serial alone is not flagged.
+    the nameplate from it. A blank serial alone is handled by
+    check_serial_missing.
     """
     if manufacturer or model or serial:
         return None
@@ -444,6 +445,21 @@ def check_nameplate(manufacturer, model, serial, photo):
     else:
         reason = "Nameplate data missing; no photo on file"
     return Problem("nameplate", "Nameplate data missing", reason)
+
+
+def check_serial_missing(asset_type, serial, nameplate_problem):
+    """Flag a blank or placeholder serial, unless the asset type usually has none (R12).
+
+    Asset types allowed to have no serial are listed in
+    mappings.ASSET_TYPES_WITHOUT_SERIAL (e.g. Electrical Panel). If the whole
+    nameplate is blank, the nameplate reason already covers it, so no second
+    reason is added.
+    """
+    if nameplate_problem or serial_key(serial) is not None:
+        return None
+    if asset_type in mappings.ASSET_TYPES_WITHOUT_SERIAL:
+        return None
+    return Problem("serial_number", "Serial number missing", "Serial number missing")
 
 
 def check_serial_rounded(serial):
@@ -553,7 +569,9 @@ def clean_record(record, current_year):
         condition_display = to_text(raw["condition"])
     problems.append(problem)
 
-    problems.append(check_nameplate(to_text(raw["manufacturer"]), model, serial, raw.get("photo")))
+    nameplate_problem = check_nameplate(to_text(raw["manufacturer"]), model, serial, raw.get("photo"))
+    problems.append(nameplate_problem)
+    problems.append(check_serial_missing(asset_type, serial, nameplate_problem))
     problems.append(check_serial_rounded(serial))
     if source == "partner":
         problems.append(check_multi_unit(raw["description"], raw["tag"]))
@@ -832,12 +850,13 @@ def read_accepted_asset_types(path):
 
 
 def check_asset_type_mappings(path):
-    """Stop if mappings.py maps to an asset type FMX does not accept (R5)."""
+    """Stop if mappings.py uses an asset type FMX does not accept (R5, R12)."""
     accepted = read_accepted_asset_types(path)
-    not_accepted = [value for value in mappings.ASSET_TYPES if value not in accepted]
+    used = list(mappings.ASSET_TYPES) + list(mappings.ASSET_TYPES_WITHOUT_SERIAL)
+    not_accepted = [value for value in used if value not in accepted]
     if not_accepted:
         raise ValueError(
-            f"mappings.py ASSET_TYPES uses values not in {Path(path).name}: {', '.join(not_accepted)}"
+            f"mappings.py uses asset types not in {Path(path).name}: {', '.join(not_accepted)}"
         )
 
 

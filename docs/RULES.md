@@ -74,9 +74,10 @@ Principles that apply to every rule:
 
 ## Problems that need a person
 
-**R12: Nameplate missing.** A row whose manufacturer, model, and serial are all blank is flagged: "Nameplate data missing; technician photo IMG_0527.jpg on file", with the file name taken from the Photo column. With no photo: "Nameplate data missing; no photo on file".
-- **Decision:** A blank serial on its own is not flagged.
-- **Why:** Every row with only the serial missing is an electrical panel (21 rows), and panels usually don't carry a serial. Flagging them would fill the review list with rows nobody can fix.
+**R12: Nameplate or serial missing.** A row whose manufacturer, model, and serial are all blank is flagged: "Nameplate data missing; technician photo IMG_0527.jpg on file", with the file name taken from the Photo column. With no photo: "Nameplate data missing; no photo on file".
+- A row with a blank or placeholder serial (`N/A`, `see schedule`, and the other entries in the serial placeholder list) is flagged "Serial number missing", unless its asset type is on the list of asset types allowed to have no serial in `mappings.py` (currently Electrical Panel only). An unrecognized asset type isn't on the list, so it's flagged too. When the whole nameplate is blank, only the nameplate reason is given, not both.
+- **Decision:** An editable list of asset types allowed to have no serial, starting with Electrical Panel. It replaces a blanket rule that a blank serial on its own is never flagged.
+- **Why:** I didn't know which equipment commonly lacks a serial, so it's an editable list rather than a blanket exception. In this data every row with only the serial missing is an electrical panel (21 rows), which is why the list starts there. Anyone who learns that another type usually has no serial can add it in `mappings.py` without touching the code.
 
 **R13: Serial that Excel may have rounded.** A serial made only of digits that ends in four or more zeros (e.g. `4430000000`) is flagged: "Serial 4430000000 may have been rounded by Excel; check the photo or nameplate".
 - **Decision:** The check is "all digits", not "stored as a number in Excel".

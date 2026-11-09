@@ -317,8 +317,25 @@ def test_R12_blank_nameplate_without_photo():
     assert rc.check_nameplate("", "", "", None).reason == "Nameplate data missing; no photo on file"
 
 
-def test_R12_blank_serial_alone_is_not_flagged():
-    assert rc.check_nameplate("Square D", "NQ442L225", "", None) is None
+@pytest.mark.parametrize(
+    "asset_type, serial, flagged",
+    [
+        ("Panel", None, False),  # Electrical Panel is on the allowed-no-serial list
+        ("Panel", "N/A", False),
+        ("DX split", "N/A", True),
+        ("Fire Alarm Control Panel", None, True),
+        ("fan", None, True),  # unknown type: not on the list, so flagged
+        ("DX split", "3039513", False),
+    ],
+)
+def test_R12_blank_serial_flagged_unless_type_allowed(asset_type, serial, flagged):
+    row = rc.flag_row(rc.single_row(clean(tech_record(asset_type=asset_type, serial_number=serial))))
+    assert ("Serial number missing" in row["review_reason"]) == flagged
+
+
+def test_R12_fully_blank_nameplate_not_also_flagged_serial_missing():
+    row = rc.flag_row(rc.single_row(clean(tech_record(manufacturer=None, model=None, serial_number=None, photo="IMG_1.jpg"))))
+    assert row["review_reason"] == "Nameplate data missing; technician photo IMG_1.jpg on file"
 
 
 @pytest.mark.parametrize("serial, flagged", [("4430000000", True), ("4586578415", False), ("FBOU0000", False)])

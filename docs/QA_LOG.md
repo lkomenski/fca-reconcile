@@ -149,3 +149,14 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 - Both files were restored with `git checkout -- reconcile.py`.
 **Fix:** No change needed. A side lesson: `round()` would have been a quiet bug for scores 1, 5 and 9. `math.ceil` is the right call for "half, rounded up".
 **Verified by:** `pytest`: 118 passed after the restore.
+
+### QA-016 · 2026-11-08 16:38 · Blanket "blank serial is fine" exception replaced by an editable list
+**Rule(s):** R12
+**What looked off:** R12 never flagged a blank serial on its own. That was fine for the 21 electrical panels, but it also let `technician:29` (DX split, serial `N/A`) and `technician:91` (Fire Alarm Control Panel, serial `N/A`) go out as ready, even though that equipment normally has a serial and can't be matched as a duplicate without one.
+**First theory:** The blanket exception was too broad; it was written from the panels alone.
+**Cause:** A judgment call, not a bug. The original decision assumed every serial-less row was a panel.
+**How it was proven:** Before the change, the 30 technician rows with a blank serial were 9 fully blank nameplates plus 21 Electrical Panels, and `N/A` serials weren't counted as blank. After adding `ASSET_TYPES_WITHOUT_SERIAL = ["Electrical Panel"]`, the new "Serial number missing" flag catches exactly 3 rows:
+- `technician:29` and `technician:91` (newly flagged)
+- `partner:54` (serial "see schedule"; already flagged by R14, now with a second reason)
+**Fix:** The list lives in `mappings.py`, and the startup check confirms every entry is an accepted asset type. A fully blank nameplate gets only the R12 nameplate reason, not both.
+**Verified by:** Run summary: 201 in = 115 ready + 51 needs_review + 35 merged (was 117 + 49 + 35). Tests `test_R12_blank_serial_flagged_unless_type_allowed` (6 cases) and `test_R12_fully_blank_nameplate_not_also_flagged_serial_missing`; 124 tests pass.

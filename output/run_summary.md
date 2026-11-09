@@ -1,6 +1,6 @@
 # Run summary
 
-Run at 2026-11-08 16:31.
+Run at 2026-11-08 16:36.
 Technician file: `Technician_Capture.csv.xlsx`. Partner file: `Partner_Equipment_List.xlsx`.
 
 | Count | Rows |
@@ -8,12 +8,12 @@ Technician file: `Technician_Capture.csv.xlsx`. Partner file: `Partner_Equipment
 | Technician rows in | 146 |
 | Partner rows in | 55 |
 | **Total rows in** | **201** |
-| Rows ready | 117 |
-| Rows flagged (needs_review) | 49 |
+| Rows ready | 115 |
+| Rows flagged (needs_review) | 51 |
 | Rows merged into a duplicate | 35 (in 35 merged rows) |
 | Rows in import_ready.csv | 166 |
 
-Row check (R21): 201 in = 117 ready + 49 needs_review + 35 merged. Passed.
+Row check (R21): 201 in = 115 ready + 51 needs_review + 35 merged. Passed.
 
 ## Accepted, but worth knowing
 
@@ -33,6 +33,7 @@ Number of flagged rows with each reason. A row with several problems is counted 
 | Condition missing | 4 |
 | Note may affect row | 4 |
 | Manufacturer not recognized | 4 |
+| Serial number missing | 3 |
 | Install year differs between sources | 2 |
 | Install year in the future | 1 |
 | Asset type missing | 1 |

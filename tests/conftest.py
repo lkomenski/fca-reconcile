@@ -21,7 +21,7 @@ RULE_NAMES = {
     "R9": "install years",
     "R10": "technician condition 1-10 to 1-5",
     "R11": "partner condition text to 1-5",
-    "R12": "nameplate missing",
+    "R12": "nameplate or serial missing",
     "R13": "serial rounded by Excel",
     "R14": "one row, several units",
     "R15": "notes keywords",

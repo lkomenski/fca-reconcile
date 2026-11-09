@@ -61,6 +61,7 @@ Three files appear in the `output` folder (it's created if needed, and files fro
 | Install year differs between sources | Technician and partner years are more than 2 years apart. The technician's year was used. | Check which is right. The partner's year is the year of manufacture. |
 | Condition is missing / not a number / outside the 1-10 scale / not one of Good, Fair, Poor, Critical | The condition couldn't be converted to FMX's 1-5 scale. | Ask the technician or partner for the rating, or rate it from the photo and notes. |
 | Condition differs between sources | The two ratings are 2 or more points apart on the 1-5 scale. The lower (worse) rating was used. | Decide which rating is right; one person likely saw a problem the other didn't. |
+| Serial number missing | The serial is blank or a placeholder like "N/A", and the asset type isn't one that usually has no serial. | Read the serial from the photo or nameplate. If this type of equipment normally has no serial, add the type to `ASSET_TYPES_WITHOUT_SERIAL` in `mappings.py`. |
 | Serial NNNN may have been rounded by Excel | An all-number serial ending in 0000; Excel often damages long numbers. | Check the serial against the photo or nameplate. |
 | One row describes N units | A single partner row covers several units (e.g. "qty 4"). | Split it into one row per unit with each serial (from the partner's mechanical schedule). |
 | Technician note / Partner comment may affect this row | The note mentions something like "replaced", "abandoned" or "locked out". | Read the quoted note and update the year, condition, or row as needed. |
@@ -85,7 +86,7 @@ To add a new spelling, find the correct value and add the spelling to its list, 
         "Roof Unit",        # new
 ```
 
-The same pattern works for `BUILDINGS`, `MANUFACTURERS`, `ASSET_TYPES` and the notes keyword lists. Case and extra spaces don't matter, so there's no need to add "ROOF UNIT" separately.
+The same pattern works for `BUILDINGS`, `MANUFACTURERS`, `ASSET_TYPES`, `ASSET_TYPES_WITHOUT_SERIAL` and the notes keyword lists. Case and extra spaces don't matter, so there's no need to add "ROOF UNIT" separately.
 
 Rules for safe edits:
 - Only add a spelling that can mean one thing. If it could mean two (like "fan"), leave it out and let the tool flag it.

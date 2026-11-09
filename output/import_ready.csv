@@ -26,7 +26,7 @@ Lakeview Elementary School,Exhaust Fan,,,,,2,Roof (Art Rm),technician,needs_revi
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,62206952,2004,2,Roof-Wing B,technician,ready,
 Lakeview Elementary School,Make-Up Air Unit,CaptiveAire,A2-D.500-G10,8338595,2016,4,Kitchen,technician,ready,
 Lakeview Elementary School,fan,Greenheck,G-120-VG,60108428,2004,3,Roof - Restrooms,technician,needs_review,Asset type 'fan' is not in the accepted list; choose the correct type
-Lakeview Elementary School,Split System,Mitsubishi Electric,MSZ-GL12NA,N/A,2021,3,Main Office,technician,ready,
+Lakeview Elementary School,Split System,Mitsubishi Electric,MSZ-GL12NA,N/A,2021,3,Main Office,technician,needs_review,Serial number missing
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,61436881,2004,2,wing a roof,technician,ready,
 Lakeview Elementary School,Backflow Preventer,Watts,LF909,K335623,2010,3,Water Entry Rm,technician,ready,
 Lakeview Elementary School,heater,A.O. Smith,BTH-199,1613S970920,2012,3,kitchen,technician,needs_review,Asset type 'heater' is not in the accepted list; choose the correct type
@@ -87,7 +87,7 @@ Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,2011,3,kitchen,technician,r
 Lakeview Middle School,Split System,Mitsubishi,MSZ-GL12NA,6625103,2019,4,Main Office,technician,needs_review,Manufacturer 'Mitsubishi' is not a recognized spelling; confirm the manufacturer
 Lakeview Middle School,Elevator,Otis,hydrofit,N48451,2011,3,elevator machine rm,technician,ready,
 Lakeview Middle School,unit heater,Trane,UHSA-60,61B18352BN,1998,1,Gym,technician,needs_review,Asset type 'unit heater' is not in the accepted list; choose the correct type
-Lakeview Middle School,Fire Alarm Control Panel,Notifier,NFS2-640,N/A,2011,4,main office,technician,ready,
+Lakeview Middle School,Fire Alarm Control Panel,Notifier,NFS2-640,N/A,2011,4,main office,technician,needs_review,Serial number missing
 Lakeview Middle School,Split System,MITSUBISHI,PKA-A24KA7,7887295,2019,4,Server Rm,technician,needs_review,Manufacturer 'MITSUBISHI' is not a recognized spelling; confirm the manufacturer
 Lakeview Middle School,Unit Heater,Trane,UHSA-60,78A32150DL,1998,2,Gym,technician,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
 Lakeview High School,Rooftop Unit,,,,,2,classroom wing roof,technician,needs_review,Nameplate data missing; technician photo IMG_0611.jpg on file
@@ -164,4 +164,4 @@ Lakeview High School,Rooftop Unit,Trane,YCD150F3,01P33563LL,1998,2,"Roof, Classr
 Lakeview High School,Unit Heater,Trane,UHSA-60,86X76332ZV,1998,2,Gymnasium,partner,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
 Lakeview High School,Unit Heater,Trane,UHSA-60,84F98801BU,1997,1,Gymnasium,partner,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
 Lakeview High School,Unit Heater,Trane,UHSA-60,52A86672XK,1997,2,Loading Dock,partner,needs_review,Asset type 'Unit Heater' is not in the accepted list; choose the correct type
-Lakeview High School,Unit Ventilator,Daikin,AVV-1000,see schedule,2011,4,Classrooms 214-217,partner,needs_review,One row describes 4 units (tag UV-214 to UV-217); each unit needs its own row and serial
+Lakeview High School,Unit Ventilator,Daikin,AVV-1000,see schedule,2011,4,Classrooms 214-217,partner,needs_review,Serial number missing; One row describes 4 units (tag UV-214 to UV-217); each unit needs its own row and serial

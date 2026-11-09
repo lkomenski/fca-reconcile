@@ -103,6 +103,13 @@ PARTNER_CONDITION = {
     "Critical": 1,
 }
 
+# R12: Asset types that commonly have no serial number. A row of any other
+# type with a blank or placeholder serial is flagged "Serial number missing".
+# Each value must also be a key in ASSET_TYPES above.
+ASSET_TYPES_WITHOUT_SERIAL = [
+    "Electrical Panel",
+]
+
 # R16: Serial values that mean "no serial". Rows with these are never matched
 # as duplicates.
 SERIAL_PLACEHOLDERS = [
