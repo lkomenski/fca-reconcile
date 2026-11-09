@@ -431,3 +431,30 @@ The total matches `import_ready.csv`. The 2 technician-only merges (`technician:
 - "Values the tool didn't recognize" no longer lists Mitsubishi. "Work done automatically": 105 manufacturer spellings, 4 of them completed from evidence.
 **Fix:** `resolve_manufacturers_from_evidence` runs after cleaning. It completes the name only when the unrecognized value is the first word or words of exactly one known manufacturer, and the same model (case and spaces ignored) appears on another row under that full name. Otherwise the flag stays. The why is recorded under R6. REDUCING_REVIEW.md, NOTE_DRAFT.md, README and EXTENDING.md numbers were updated.
 **Verified by:** `test_R6_short_name_completed_when_same_model_appears_under_full_name`, `test_R6_short_name_stays_flagged_when_model_not_seen_elsewhere`, `test_R6_evidence_under_a_different_brand_does_not_count`, `test_R6_real_file_completes_all_four_mitsubishi_rows`. Two tests updated for the new expected results: `test_R22_summary_lists_every_unrecognized_value_by_field` (Mitsubishi no longer listed) and `test_R31_real_file_panels_lp1a_and_lp1b_are_flagged` (116 ready). 203 tests pass.
+
+### QA-034 · 2026-11-08 17:49 · Tag hint for possible twins (R32), tested in theory before building
+**Rule(s):** R32, R21, R16
+**What looked off:** Review finding #1 (QA-027): four "ready" rows were the same unit as a flagged row with no serial: `partner:40` RTU-4 / `technician:95`, `partner:11` B-3 / `technician:109`, `partner:6` AHU-2 / `technician:119`, and `technician:141` / `technician:143` (panel LP-2A). Advice received: merging on free-text tags is risky this late, so use a hint, not a merge.
+**First theory:** A strict tag pattern plus a same-building rule would link exactly these pairs without false matches.
+**Cause:** n/a (new rule).
+**How it was proven:** Before any repo change, the logic ran in memory from `scratchpad/tag_hint_plugin.py` and `tag_hint_trial.py`, outside the repo:
+- **FMX files:** exactly the 4 pairs above; 116 → 112 ready.
+- **Shuffled, trimmed copy:** the same 4 pairs.
+- **Reviewer's files and both made-up files:** 0 pairs.
+- **Accounting and merges:** row accounting held in every run, and none of the 35 serial merges contradicts its own tags.
+- **Real test suite with the hint on:** 202 pass; 1 failed only on the pinned ready count.
+- **Tag-trap file:** one **false match**, "RTU-5 next to RTU-4" paired with the partner's RTU-4.
+  - Misses: lowercase "rtu-4", and UV-215 against the range "UV-214 to UV-217".
+  - Correct: KP-1 in three buildings not paired, EF-12 vs EF-12A kept apart, FI-2507 not taken for a tag.
+- **One-tag rule:** with "a note naming two tags gives no tag", the false match disappeared and all 4 real pairs remained on both data sets.
+**Fix:** Added `TAG_PATTERN`, `equipment_tags` and `flag_possible_same_unit`, which runs after flagging and never merges. FMX: 112 ready / 54 needs_review / 35 merged (unchanged). Docs updated: RULES R32, the README reasons table, REDUCING_REVIEW bucket 3 (now 7 rows), EXTENDING #7, and the numbers in NOTE_DRAFT.
+- **Small [AI error] while adding tests:** two new R32 tests first failed because the AI changed the partner test row's tag to RTU-4 but left the helper's default description "Base-Mounted Pump P-1". The tool correctly flagged that description as an unknown asset type. The test data was fixed; no code change.
+**Verified by:**
+- `test_R32_rows_sharing_a_tag_in_one_building_are_both_flagged`
+- `test_R32_note_naming_two_tags_gives_no_hint`
+- `test_R32_same_tag_in_different_buildings_gives_no_hint`
+- `test_R32_tag_pattern_is_strict` (3)
+- `test_R32_real_file_links_the_four_twins_and_keeps_merges`
+- `test_R31_real_file_panels_lp1a_and_lp1b_are_flagged`, updated to 112 ready
+
+210 tests pass.

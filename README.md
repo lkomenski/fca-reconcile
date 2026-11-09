@@ -28,7 +28,7 @@ When it finishes, it prints any warnings and a one-line count like:
 
 ```
 Warning: Sheet 'Legend' in the partner file was not read.
-Rows in: 146 technician + 55 partner. Ready: 116. Needs review: 50. Merged into duplicates: 35.
+Rows in: 146 technician + 55 partner. Ready: 112. Needs review: 54. Merged into duplicates: 35.
 ```
 
 The `Legend` warning is expected for FMX's partner file (see section 8).
@@ -75,6 +75,7 @@ A row with several problems lists them all, separated by ` | `.
 | Serial NNNN may have been damaged by Excel | The serial ends in 0000, is in scientific notation (4.43E+09), or is longer than 15 digits. Excel often damages long numbers. | Check the serial against the photo or nameplate. |
 | Year may have been misread; check nameplate | The year reads as very old (before 1950 from a date cell, or before 1970 from a two-digit year like '27'), which usually means Excel or a typo changed it. | Check the nameplate or photo and type the real year. |
 | Manufacturer (...) and model (...) come from different rows | A merged row got its manufacturer from one row and its model from another, and no single row had both. | Check the photo or nameplate to confirm the model belongs to that manufacturer. |
+| Possibly the same unit as ... (tag RTU-4); don't import twice | Two rows in the same building share an equipment tag but have no matching serial (often one has an unreadable nameplate). They were not merged. | Check whether they're the same unit. If so, keep the row with the nameplate data and delete the other. |
 | Looks identical to another row in the import file | Two rows have exactly the same values in every import column. | Use the quoted notes (e.g. panel names) to tell them apart, or delete one if it's a true duplicate. |
 | One row describes N units | A single partner row covers several units (e.g. "qty 4"). | Split it into one row per unit with each serial (from the partner's mechanical schedule). |
 | Technician note / Partner comment may affect this row | The note mentions something like "replaced", "abandoned" or "locked out". | Read the quoted note and update the year, condition, or row as needed. |

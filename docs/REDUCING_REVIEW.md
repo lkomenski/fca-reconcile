@@ -1,8 +1,8 @@
 # Reducing the review list
 
-The FMX run flags 50 of 166 rows as needs_review. Some of those flags are the tool doing its job, and some are work that better data or better tooling could remove. I grouped every flagged row by its review reason into four buckets, based on what would remove the flag.
+The FMX run flags 54 of 166 rows as needs_review. Some of those flags are the tool doing its job, and some are work that better data or better tooling could remove. I grouped every flagged row by its review reason into four buckets, based on what would remove the flag.
 
-Counts are rows from the run on 2026-11-08 (116 ready, 50 needs_review). Each row falls into one bucket, so the bucket totals add up to 50.
+Counts are rows from the run on 2026-11-08 (112 ready, 54 needs_review). Each row falls into one bucket, so the bucket totals add up to 54.
 
 ## 1. Learnable: fixed by updating the lookups, or connecting them to FMX's source of truth (9 rows)
 
@@ -33,15 +33,16 @@ partner:54 also has "One row describes 4 units".
 - **Nameplate photos:** AI reads the photo while the technician is still on site, and the technician confirms the result. 8 of the 9 nameplate rows already have a photo.
 - **Partner template:** one row per unit, with FMX's approved list.
 
-## 3. Better matching in the tool (3 rows, plus 3 already counted in bucket 2)
+## 3. Better matching in the tool (7 rows, plus 3 already counted in bucket 2)
 
 | Reason | Rows | Examples |
 |---|---|---|
+| Possibly the same unit (tag hint, R32), on the copy that has nameplate data | 4 | partner:40 RTU-4, partner:11 B-3, partner:6 AHU-2, technician:141 LP-2A |
 | Repeat entry not matched | 1 | technician:143 "Panel LP-2A, 2nd pass", the same panel as technician:141 |
 | Looks identical to another row | 2 | technician:33 / 45, panels LP-1B and LP-1A, told apart only by notes |
 | (Nameplate missing, but the partner has the unit) | (3) | technician:95 RTU-4, 109 B-3, 119 AHU-2 |
 
-**Future change:** tag matching. Match units by equipment tag ("RTU-4") or panel name ("LP-2A") from the notes, within the same building, when there's no serial. That would merge the three nameplate rows with their partner copies and catch the repeat panel. Carrying the panel name into the import would also tell LP-1A from LP-1B.
+**Future change:** automatic tag merging. The tool already links these twins with a hint (R32), which closes the double-import risk but adds 4 flags. Once the hint has been confirmed right on a few real assessments, it could merge them instead: the three nameplate rows into their partner copies, and the repeat panel into its first entry. The two identical panels, LP-1A and LP-1B, would need the panel name carried into the import, which FMX's format has no column for today.
 
 ## 4. Real judgment calls that should stay flagged (9 rows)
 
@@ -55,7 +56,7 @@ partner:54 also has "One row describes 4 units".
 
 ## Estimate
 
-If buckets 1–3 were addressed, about **10 of the 50** flags would remain:
+If buckets 1–3 were addressed, about **10 of the 54** flags would remain:
 - the 9 judgment-call rows;
 - technician:40, which no capture rule fixes, because the room was locked and nothing was captured.
 

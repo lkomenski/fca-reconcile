@@ -32,3 +32,4 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 17:30 | docs/EXTENDING.md for the PM and engineering pod: 7 extension points, 12 ranked assumptions. Linked from README and NOTE_DRAFT. |
 | 17:34 | Warning for workbook sheets that were not read (R29); EXTENDING #6 updated. 199 tests pass. |
 | 17:41 | Manufacturer completed from the same model elsewhere in the file (R6): 116 ready / 50 needs_review / 35 merged; 203 tests pass. |
+| 17:49 | R32 tag hint built after an in-theory trial: 112 ready / 54 needs_review / 35 merged; 210 tests pass. Docs and note numbers updated. |

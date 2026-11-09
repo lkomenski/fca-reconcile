@@ -180,5 +180,9 @@ Before any output is replaced, the tool checks that `full_detail.csv` and `impor
 - **Decision:** A separate detail file, not extra columns in the import file.
 - **Why:** I didn't want anything captured in the field to be lost just because FMX's import format has no column for it. Keeping it in its own file means the import still matches FMX's format exactly.
 
+**R32: Possibly the same unit, by equipment tag.** Equipment tags (`RTU-4`, `B-3`, `AHU-2`, `LP-2A`: uppercase letters, a dash, 1–3 digits, an optional letter) are read from the partner's Tag column and from technician notes. A note naming two or more tags ("RTU-5 next to RTU-4") gives no tag. If two output rows in the same building share a tag and weren't merged by serial, both are flagged: "Possibly the same unit as partner:40 (tag RTU-4); don't import twice". Nothing is merged.
+- **Decision:** A hint, never a merge. The strict tag pattern and the one-tag rule were tested before building, against the FMX files, a shuffled copy, the reviewer's files, and deliberate tag traps (QA-034).
+- **Why:** Merging on free-text tags is where wrong data hides, so the tool links the twins and a person decides. Without this, the "ready" partner copy of an RTU with an unreadable nameplate would go out on its own, and the unit would be imported twice once someone filled in the flagged copy from the photo.
+
 **R31: Rows that look identical in the import.** If two or more ready rows have the same values in every import column, each is flagged and every row's notes are quoted: "Looks identical to another row in the import file; tell them apart by notes (technician:33 notes: 'Panel LP-1B'; technician:45 notes: 'Panel LP-1A')".
 - **Why:** Two panels in the same corridor can match on every import column, and the panel name lives only in the notes. Imported as they are, nobody could tell them apart, or tell whether one is a duplicate.
