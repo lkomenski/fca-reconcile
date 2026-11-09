@@ -110,7 +110,7 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 **Cause:** The AI estimated elapsed time instead of reading the clock, and wrote the estimates as if they were real times.
 **How it was proven:** `date` returned 16:26. `git log` shows the two doc commits at 16:19 and 16:22.
 **Fix:** TIME_LOG rewritten from the system clock and git commit times. QA-011 re-dated to 16:21 (between the two commits). From here on, every timestamp comes from `date` or git.
-**Verified by:** Every TIME_LOG entry now matches a commit time or a clock reading taken at that step.
+**Verified by:** Every TIME_LOG entry now matches a commit time or a clock reading taken at that step. The slip happened once more: QA-016 was stamped 16:38 when the clock read 16:37. It was corrected to 16:36, the last clock reading before that entry.
 
 ### QA-013 · 2026-11-08 16:26 · [AI error] Inspection report undercounted the "Mitsubishi" rows
 **Rule(s):** R6
@@ -150,7 +150,7 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 **Fix:** No change needed. A side lesson: `round()` would have been a quiet bug for scores 1, 5 and 9. `math.ceil` is the right call for "half, rounded up".
 **Verified by:** `pytest`: 118 passed after the restore.
 
-### QA-016 · 2026-11-08 16:38 · Blanket "blank serial is fine" exception replaced by an editable list
+### QA-016 · 2026-11-08 16:36 · Blanket "blank serial is fine" exception replaced by an editable list
 **Rule(s):** R12
 **What looked off:** R12 never flagged a blank serial on its own. That was fine for the 21 electrical panels, but it also let `technician:29` (DX split, serial `N/A`) and `technician:91` (Fire Alarm Control Panel, serial `N/A`) go out as ready, even though that equipment normally has a serial and can't be matched as a duplicate without one.
 **First theory:** The blanket exception was too broad; it was written from the panels alone.
@@ -160,3 +160,19 @@ Entry format: **Rule(s)** · **What looked off** · **First theory** · **Cause*
 - `partner:54` (serial "see schedule"; already flagged by R14, now with a second reason)
 **Fix:** The list lives in `mappings.py`, and the startup check confirms every entry is an accepted asset type. A fully blank nameplate gets only the R12 nameplate reason, not both.
 **Verified by:** Run summary: 201 in = 115 ready + 51 needs_review + 35 merged (was 117 + 49 + 35). Tests `test_R12_blank_serial_flagged_unless_type_allowed` (6 cases) and `test_R12_fully_blank_nameplate_not_also_flagged_serial_missing`; 124 tests pass.
+
+### QA-017 · 2026-11-08 16:38 · Room-number locations standardized; nothing else changed
+**Rule(s):** R8
+**What looked off:** Room locations appeared in five formats: `103` (stored as a number), `Room 102`, `rm110`, `Rm 101`, and FMX's own `Rm 205`.
+**First theory:** A room number has one right answer, so it can be standardized without guessing. The risk was the pattern catching locations that only *contain* a number, like `Mech Rm 104`, `Kitchen 115` or `IT Closet 112`.
+**Cause:** n/a (new rule). The pattern only accepts a whole value that is a room number: 1–4 digits, optionally after "Room" or "Rm".
+**How it was proven:** The full run was compared before and after the change:
+- 166 rows each time; 16 rows changed, and in every one only `location` changed.
+- The 16 changes, all room numbers:
+  - Bare numbers: `103`→`Rm 103`, plus `106`, `107`, `108`, `207`, `211`, `212`, `213` in the same way.
+  - `Room 102`/`202`/`203`/`204` → `Rm …`
+  - `rm110`/`206`/`208`/`210` → `Rm …`
+- `Mech Rm 104`, `Kitchen 115`, `IT Closet 112` and `Classroom 208` were unchanged.
+- Counts unchanged: 115 ready, 51 needs_review, 35 merged.
+**Fix:** `normalize_location` added. The R8 decision is updated, and the broader location question is recorded in OPEN_QUESTIONS.md #5.
+**Verified by:** `test_R8_room_numbers_standardized` (6 cases), `test_R8_other_locations_kept_as_captured` (5 cases), `test_R8_location_cleaned_inside_a_full_row`; 135 tests pass.

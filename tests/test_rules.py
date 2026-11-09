@@ -215,10 +215,28 @@ def test_R7_model_and_serial_as_captured_trimmed(raw, expected):
     assert rc.to_text(raw) == expected
 
 
-def test_R8_location_kept_as_captured():
-    row = clean(tech_record(location="cafeteria roof"))
-    assert row["values"]["location"] == "cafeteria roof"
-    assert clean(tech_record(location=103))["values"]["location"] == "103"
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
+        (103, "Rm 103"),
+        ("Room 103", "Rm 103"),
+        ("rm103", "Rm 103"),
+        ("Rm. 103", "Rm 103"),
+        ("RM 205", "Rm 205"),
+        ("Rm 205", "Rm 205"),
+    ],
+)
+def test_R8_room_numbers_standardized(raw, expected):
+    assert rc.normalize_location(raw) == expected
+
+
+@pytest.mark.parametrize("raw", ["cafeteria roof", "Mech Rm 104", "Kitchen 115", "IT Closet 112", "Roof - Gym"])
+def test_R8_other_locations_kept_as_captured(raw):
+    assert rc.normalize_location(raw) == raw
+
+
+def test_R8_location_cleaned_inside_a_full_row():
+    assert clean(tech_record(location=" Room 202 "))["values"]["location"] == "Rm 202"
 
 
 # --- R9: install year ----------------------------------------------------------

@@ -9,18 +9,18 @@ Lakeview Elementary School,Pump,Bell & Gossett,e-1510 2BC,22R60552,1998,2,boiler
 Lakeview Elementary School,Pump,Taco,11,684796,1998,4,Blr Rm,technician,needs_review,Technician note may affect this row: 'replaced 2016 per custodian'
 Lakeview Elementary School,Rooftop Unit,Carrier,48TCED12,9886D49245,2016,4,Roof - Admin,technician,ready,
 Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU687770,2004,2,Rm 101,technician,ready,
-Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU734596,2004,1,103,technician,ready,
+Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU734596,2004,1,Rm 103,technician,ready,
 Lakeview Elementary School,Pump,Bell & Gossett,e-1510 2BC,11D92322,1998,2,Boiler Rm,technician,ready,
-Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU804611,2004,2,Room 102,technician,ready,
-Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU357168,2004,2,106,technician,ready,
+Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU804611,2004,2,Rm 102,technician,ready,
+Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU357168,2004,2,Rm 106,technician,ready,
 Lakeview Elementary School,Rooftop Unit,Trane,YCD150F3,98C69138WD,2004,2,cafeteria roof,technician,ready,
-Lakeview Elementary School,Unit Ventilator,,,,,2,107,technician,needs_review,Nameplate data missing; technician photo IMG_0431.jpg on file
+Lakeview Elementary School,Unit Ventilator,,,,,2,Rm 107,technician,needs_review,Nameplate data missing; technician photo IMG_0431.jpg on file
 Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU630120,,2,Rm 104,technician,needs_review,Install year 2031 is in the future
-Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU505759,2004,2,rm110,technician,ready,
+Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU505759,2004,2,Rm 110,technician,ready,
 Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU959754,2004,2,Rm 105,technician,ready,
 Lakeview Elementary School,Unit Ventilator,Daikin,avv-1000,FBOU317207,,2,Rm 109,technician,ready,
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,77936666,,1,Roof (Kitchen),technician,ready,
-Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU441425,,2,108,technician,needs_review,Install year 'unknown' could not be read as a year
+Lakeview Elementary School,Unit Ventilator,Daikin,AVV-1000,FBOU441425,,2,Rm 108,technician,needs_review,Install year 'unknown' could not be read as a year
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,28955725,2004,2,gym roof,technician,ready,
 Lakeview Elementary School,Exhaust Fan,,,,,2,Roof (Art Rm),technician,needs_review,Nameplate data missing; technician photo IMG_0458.jpg on file
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,62206952,2004,2,Roof-Wing B,technician,ready,
@@ -62,15 +62,15 @@ Lakeview Middle School,Exhaust Fan,Greenheck,GB-141,47282770,,2,Roof - Restrooms
 Lakeview Middle School,Exhaust Fan,Greenheck,GB-141,92160239,2011,3,Roof - Kitchen,technician,ready,
 Lakeview Middle School,Exhaust Fan,Greenheck,GB-141,28451957,1998,1,Roof-Gym,technician,ready,
 Lakeview Middle School,Exhaust Fan,Greenheck,GB-141,19086418,2011,3,Roof (Locker Rms),technician,ready,
-Lakeview Middle School,Unit Ventilator,Trane,vuve100,05W88840KE,1998,2,Room 202,technician,ready,
+Lakeview Middle School,Unit Ventilator,Trane,vuve100,05W88840KE,1998,2,Rm 202,technician,ready,
 Lakeview Middle School,Unit Ventilator,Trane,VUVE100,55J62881WZ,1998,2,Rm 201,technician,ready,
-Lakeview Middle School,Unit Ventilator,Trane,VUVE100,95Y71709AK,,2,Room 203,technician,needs_review,Install year '19987' could not be read as a year
-Lakeview Middle School,Unit Ventilator,Trane,VUVE100,87M18446CD,1998,2,Room 204,technician,ready,
+Lakeview Middle School,Unit Ventilator,Trane,VUVE100,95Y71709AK,,2,Rm 203,technician,needs_review,Install year '19987' could not be read as a year
+Lakeview Middle School,Unit Ventilator,Trane,VUVE100,87M18446CD,1998,2,Rm 204,technician,ready,
 Lakeview Middle School,Exhaust Fan,,,,,3,science roof,technician,needs_review,Nameplate data missing; technician photo IMG_0539.jpg on file
 Lakeview Middle School,Pump,Bell & Gossett,e-1510 2BC,93P66407,2011,2,boiler room,technician,ready,
-Lakeview Middle School,Unit Ventilator,Trane,VUVE100,66Y71442AH,1998,2,207,technician,ready,
+Lakeview Middle School,Unit Ventilator,Trane,VUVE100,66Y71442AH,1998,2,Rm 207,technician,ready,
 Lakeview Middle School,Unit Ventilator,Trane,VUVE100,52Y13254WC,1998,1,Rm 208,technician,ready,
-Lakeview Middle School,Unit Ventilator,Trane,VUVE100,27T86560NN,1998,3,rm206,technician,ready,
+Lakeview Middle School,Unit Ventilator,Trane,VUVE100,27T86560NN,1998,3,Rm 206,technician,ready,
 Lakeview Middle School,Water Heater,Lochinvar,AWN200PM,7160P887260,,4,Kitchen,technician,ready,
 Lakeview Middle School,Water Heater,Lochinvar,AWN200PM,3754P454754,2018,,boiler room,technician,needs_review,Condition 'Good' is not a number on the technician's 1-10 scale
 Lakeview Middle School,Electrical Panel,Cutler-Hammer,PRL1A,,1998,2,corridor 1,technician,ready,
@@ -114,17 +114,17 @@ Lakeview High School,Exhaust Fan,Greenheck,CUE-099,65113859,1998,2,gym roof,both
 Lakeview High School,Exhaust Fan,Greenheck,CUE-099,91102761,2012,3,Roof (Restrooms),both,ready,
 Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU810697,2012,3,Rm 209,both,ready,
 Lakeview High School,Air Handling Unit,,,,,2,mech rm 120,technician,needs_review,Nameplate data missing; technician photo IMG_0620.jpg on file
-Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU103574,2012,3,211,both,ready,
-Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU406796,2012,3,212,both,ready,
+Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU103574,2012,3,Rm 211,both,ready,
+Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU406796,2012,3,Rm 212,both,ready,
 Lakeview High School,Exhaust Fan,Greenheck,CUE-099,14690751,2012,2,Roof-Classroom Wing,both,ready,
-Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU471974,2012,4,213,both,ready,
-Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU373444,2012,3,rm208,both,ready,
+Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU471974,2012,4,Rm 213,both,ready,
+Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU373444,2012,3,Rm 208,both,ready,
 Lakeview High School,Water Heater,A.O. Smith,BTR-275,7989E905548,2012,3,Locker Rms,both,ready,
 Lakeview High School,Backflow Preventer,Watts,LF909,H856372,1998,2,Water Entry Rm,both,needs_review,"Condition differs between sources: technician:126 4/10 (2 of 5), partner:55 Good (4 of 5); used the lower rating"
 Lakeview High School,Water Heater,A.O. Smith,BTR-275,3552Y379731,2019,3,Kitchen,both,needs_review,"Install year differs between sources: technician:127 2019, partner:58 2012 (year of manufacture)"
 Lakeview High School,Water Heater,A.O. Smith,BTR-275,4171M054224,2012,4,Blr Rm,both,ready,
 Lakeview High School,Make-Up Air Unit,CaptiveAire,A2-D.500-G10,5869262,2012,3,kitchen,both,ready,
-Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU562217,2012,2,rm210,both,ready,
+Lakeview High School,Unit Ventilator,Daikin,AVV-1000,FBOU562217,2012,2,Rm 210,both,ready,
 Lakeview High School,Backflow Preventer,Watts,LF909,P954224,2012,3,Blr Rm,both,ready,
 Lakeview High School,Electrical Panel,Square D,NQ442L225,,1998,2,corridor 1,technician,ready,
 Lakeview High School,Electrical Panel,Square D,NQ442L225,,1998,2,corridor 2,technician,ready,

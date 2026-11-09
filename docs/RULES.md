@@ -39,9 +39,9 @@ Principles that apply to every rule:
 
 **R7: Model and serial number.** Kept exactly as captured, with leading and trailing spaces trimmed. Values Excel stored as numbers (e.g. serial `684796`, model `11`) are written as plain text with no decimal point.
 
-**R8: Location.** Kept as captured, trimmed. Room numbers stored as numbers (e.g. `103`) are written as text.
-- **Decision:** The location is not rewritten to a standard format.
-- **Why:** FMX's first example row shows `cafeteria roof` rewritten as `Roof - Cafeteria`, but the requirements never ask for location cleanup. Rewriting free text means guessing what the technician meant.
+**R8: Location.** A location that is only a room number is standardized to `Rm <number>`: `103`, `Room 103`, `rm103`, `Rm. 103` and `RM 103` all become `Rm 103`. The whole value must be a room number (1–4 digits, optionally after "Room" or "Rm"). Anything else is kept as captured and trimmed, including locations that merely contain a room number, like `Mech Rm 104` or `Kitchen 115`. Nothing is flagged.
+- **Decision:** Only room-number formats are standardized. All other locations are kept as captured.
+- **Why:** A bare room number has one right answer, and `Rm 205` is the format FMX's own example row uses. Other free text, like FMX's example rewriting `cafeteria roof` as `Roof - Cafeteria`, means guessing what the technician meant, and I'd want an agreed location format first. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) #5.
 
 ## Install year
 

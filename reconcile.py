@@ -378,6 +378,20 @@ def unreadable_year(text):
     )
 
 
+def normalize_location(raw):
+    """Standardize a location that is only a room number (R8).
+
+    "103", "Room 103", "rm103" and "Rm. 103" all become "Rm 103". Anything
+    else, like "Mech Rm 104" or "cafeteria roof", is kept as captured,
+    because rewriting free text would be a guess.
+    """
+    text = to_text(raw)
+    match = re.fullmatch(r"(?:(?:room|rm)\.?\s*)?(\d{1,4})", text, flags=re.IGNORECASE)
+    if match:
+        return f"Rm {match.group(1)}"
+    return text
+
+
 def convert_condition_10pt(raw):
     """Convert a technician 1-10 condition score to the 1-5 scale (R10).
 
@@ -593,7 +607,7 @@ def clean_record(record, current_year):
             "serial_number": serial,
             "install_year": year,
             "condition": condition,
-            "location": to_text(raw["location"]),  # R8: as captured, trimmed
+            "location": normalize_location(raw["location"]),
         },
         "problems": [problem for problem in problems if problem],
         "approximate_year": approximate,

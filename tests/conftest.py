@@ -17,7 +17,7 @@ RULE_NAMES = {
     "R5": "asset types",
     "R6": "manufacturer spellings",
     "R7": "model and serial as captured",
-    "R8": "location as captured",
+    "R8": "location (room numbers standardized)",
     "R9": "install years",
     "R10": "technician condition 1-10 to 1-5",
     "R11": "partner condition text to 1-5",

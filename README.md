@@ -44,6 +44,8 @@ Three files appear in the `output` folder (it's created if needed, and files fro
 
 **Source row IDs** in the review list, like `technician:76` or `partner:42`, are the spreadsheet row numbers. Open the original file and go to row 76 to see exactly what was captured. A merged row lists every row it came from, e.g. `technician:100; partner:42`.
 
+**Locations** are kept as captured, except a location that is only a room number, which is written as `Rm 103` (from `103`, `Room 103`, `rm103` and so on).
+
 **Merged rows** (`source = both`) are equipment both the technician and the partner logged, matched by building and serial number. They take model and serial from the partner, location from the technician, and the worse of the two condition ratings.
 
 ## 4. Review reasons and what to do

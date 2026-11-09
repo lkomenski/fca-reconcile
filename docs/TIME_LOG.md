@@ -16,3 +16,6 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 16:26 | Output checked against the inspection counts and FMX's three example rows. Commit `953363f`. |
 | 16:31 | Tests written: 118 pass (one or more per rule, the accounting check, the unseen-file run, output columns). Two deliberate bugs confirmed caught. Commit `f7d871e`. |
 | 16:32 | README written. All must-haves done, about 47 minutes before the checkpoint. Commit `2a1c31b`. |
+| 16:36 | R12 changed to an editable list of asset types allowed to have no serial. 115 ready / 51 needs_review / 35 merged. Commit `34419f6`. |
+| 16:37 | OPEN_QUESTIONS.md added and referenced from R18/R19. Commit `03b2fe5`. |
+| 16:38 | R8 room-number cleanup: 16 locations standardized, counts unchanged, 135 tests pass. |
