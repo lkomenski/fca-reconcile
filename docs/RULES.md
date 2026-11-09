@@ -135,7 +135,7 @@ A problem stays on the merged row only if it belongs to a value actually used, o
 - `import_ready.csv`: exactly the columns of `Target_Format.xlsx`, in order, with every output row (ready and needs_review).
 - `review_list.csv`: only needs_review rows, with the reason, the source row IDs, and the raw captured values next to the cleaned ones.
 - `full_detail.csv`: see R30.
-- `run_summary.md`: the run date and time and the input file names; a coverage table of output rows per building (technician only, partner only, both); rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason. It also lists every value the tool didn't recognize, by field (building, asset type, manufacturer, condition, install year), with the file it came from and the number of input rows, plus every building name accepted by keyword. A specialist can then update `mappings.py` in one pass.
+- `run_summary.md`: the run date and time and the input file names; a "Work done automatically" table (counts of values the tool fixed on its own); a coverage table of output rows per building (technician only, partner only, both); rows in per source, rows ready, rows flagged, duplicates merged, approximate years accepted, partner years of manufacture used, and a count for each type of review reason. It also lists every value the tool didn't recognize, by field (building, asset type, manufacturer, condition, install year), with the file it came from and the number of input rows, plus every building name accepted by keyword. A specialist can then update `mappings.py` in one pass.
 
 ## Checks across rows
 

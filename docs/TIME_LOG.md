@@ -27,3 +27,4 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 17:15 | Fixing review findings 2–8 and 12 plus the type-checker warnings (stop at 17:55). Commits `ad24709`, `43e86f8`. |
 | 17:21 | Verification: adversarial files re-run, mutated technician file (117 of 146 rows, shuffled, edited), FMX run twice (identical). FMX: 113 / 53 / 35; 198 tests pass. |
 | 17:22 | QA-030–032 logged; NOTE_DRAFT updated. |
+| 17:28 | "Work done automatically" counts added to the run summary (counts only). Commit below. |

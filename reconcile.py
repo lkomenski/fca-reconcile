@@ -1298,6 +1298,34 @@ def check_asset_type_mappings(accepted):
         )
 
 
+def automatic_work_counts(cleaned_rows):
+    """Count the values the tool changed on its own, for the run summary (R22).
+
+    Counts only: a value counts when it was cleaned without a problem and
+    the cleaned value differs from what was captured. Counted per input row,
+    before duplicates were merged.
+    """
+    counts = Counter()
+    for row in cleaned_rows:
+        raw = row["raw"]
+        clean_fields = {field for field in FIELDS if not problems_for_field(row, field)}
+        values = row["values"]
+        if "building" in clean_fields and has_value(values["building"]) and values["building"] != to_text(raw.get("building")):
+            counts["buildings"] += 1
+        raw_type = raw.get("description") if row["source"] == "partner" else raw.get("asset_type")
+        if "asset_type" in clean_fields and has_value(values["asset_type"]) and values["asset_type"] != to_text(raw_type):
+            counts["asset_types"] += 1
+        if "manufacturer" in clean_fields and has_value(values["manufacturer"]) and values["manufacturer"] != to_text(raw.get("manufacturer")):
+            counts["manufacturers"] += 1
+        if values["install_year"] is not None and str(values["install_year"]) != to_text(raw.get("install_year")):
+            counts["years"] += 1
+        if values["condition"] is not None:
+            counts["conditions"] += 1
+        if has_value(values["location"]) and values["location"] != to_text(raw.get("location")):
+            counts["rooms"] += 1
+    return counts
+
+
 def unrecognized_values(cleaned_rows):
     """Count every captured value the tool did not recognize, by field (R22).
 
@@ -1382,6 +1410,7 @@ def reconcile(technician_path, partner_path, current_year=None, asset_types_path
         "counts": counts,
         "unrecognized": unrecognized_values(cleaned),
         "keyword_buildings": keyword_buildings,
+        "automatic": automatic_work_counts(cleaned),
         "row_errors": row_errors,
         "warnings": [],
         # R30: every original column, in file order, for full_detail.csv.
@@ -1591,6 +1620,23 @@ def summary_text(result, technician_path, partner_path):
         f"needs_review + {counts['merged_away']} merged. Passed.",
     ]
     lines += coverage_lines(result)
+    automatic = result.get("automatic") or Counter()
+    lines += [
+        "",
+        "## Work done automatically",
+        "",
+        "Values the tool fixed without a person, counted per input row before duplicates were merged.",
+        "",
+        "| Change | Rows |",
+        "|---|---|",
+        f"| Manufacturer spellings standardized | {automatic['manufacturers']} |",
+        f"| Asset types mapped to FMX's list | {automatic['asset_types']} |",
+        f"| Building names standardized | {automatic['buildings']} |",
+        f"| Install years converted to four digits | {automatic['years']} |",
+        f"| Condition ratings converted to the 1-5 scale | {automatic['conditions']} |",
+        f"| Room numbers cleaned (e.g. `rm110` to `Rm 110`) | {automatic['rooms']} |",
+        f"| Duplicate rows merged | {counts['merged_away']} (into {counts['duplicate_groups']} rows) |",
+    ]
     lines += [
         "",
         "## Accepted, but worth knowing",

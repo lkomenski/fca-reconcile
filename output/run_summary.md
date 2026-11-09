@@ -1,6 +1,6 @@
 # Run summary
 
-Run on 2026-11-08 at 17:23.
+Run on 2026-11-08 at 17:27.
 
 - Technician file: `Technician_Capture.csv.xlsx`
 - Partner file: `Partner_Equipment_List.xlsx`
@@ -29,6 +29,20 @@ Rows in import_ready.csv per building, by where they came from. Where only one s
 | Lakeview Middle School | 46 | 0 | 0 | 46 |
 | Lakeview High School | 20 | 22 | 33 | 75 |
 | **All buildings** | 111 | 22 | 33 | 166 |
+
+## Work done automatically
+
+Values the tool fixed without a person, counted per input row before duplicates were merged.
+
+| Change | Rows |
+|---|---|
+| Manufacturer spellings standardized | 101 |
+| Asset types mapped to FMX's list | 167 |
+| Building names standardized | 172 |
+| Install years converted to four digits | 30 |
+| Condition ratings converted to the 1-5 scale | 194 |
+| Room numbers cleaned (e.g. `rm110` to `Rm 110`) | 17 |
+| Duplicate rows merged | 35 (into 35 rows) |
 
 ## Accepted, but worth knowing
 
