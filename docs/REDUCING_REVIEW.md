@@ -1,24 +1,25 @@
 # Reducing the review list
 
-The FMX run flags 53 of 166 rows as needs_review. Some of those flags are the tool doing its job, and some are work that better data or better tooling could remove. I grouped every flagged row by its review reason into four buckets, based on what would remove the flag.
+The FMX run flags 50 of 166 rows as needs_review. Some of those flags are the tool doing its job, and some are work that better data or better tooling could remove. I grouped every flagged row by its review reason into four buckets, based on what would remove the flag.
 
-Counts are rows from the run on 2026-11-08 (113 ready, 53 needs_review). A row with two reasons in different buckets is listed under both and noted, so the bucket totals add up to 54 for 53 rows.
+Counts are rows from the run on 2026-11-08 (116 ready, 50 needs_review). Each row falls into one bucket, so the bucket totals add up to 50.
 
-## 1. Learnable: fixed by updating the lookups, or connecting them to FMX's source of truth (13 rows)
+## 1. Learnable: fixed by updating the lookups, or connecting them to FMX's source of truth (9 rows)
 
 | Reason | Rows | Examples |
 |---|---|---|
 | Asset type not in FMX's accepted list (a real type, just not on the list) | 9 | Unit Heater ×5 (technician:90, 94; partner:45–47), Expansion Tank ×2 (partner:25, 26), Plate Heat Exchanger (partner:27), Kitchen hood (technician:46) |
-| Manufacturer not recognized ("Mitsubishi" could be Electric or Heavy Industries) | 4 | technician:34, 88, 93, 148 |
 
-**Future change:** connect the lookups to FMX's asset library instead of a hand-kept file. FMX decides once whether Unit Heater and Expansion Tank are asset types. The model number settles the brand (MSZ-GL12NA and PKA-A24KA7 are Mitsubishi Electric models). After that, these rows would be ready every time.
+**Future change:** connect the lookups to FMX's asset library instead of a hand-kept file. FMX decides once whether Unit Heater and Expansion Tank are asset types, and after that these rows would be ready every time.
+
+This bucket already shrank once: four "Mitsubishi" rows (technician:34, 88, 93, 148) were here until the tool learned to complete the name when the same model appears elsewhere in the file under "Mitsubishi Electric" (R6). A connected model catalogue would do the same for models that appear only once.
 
 ## 2. Fix at capture: avoidable with required fields, validated inputs, or AI reading nameplate photos with a person confirming (29 rows)
 
 | Reason | Rows | Examples |
 |---|---|---|
 | Nameplate data missing | 9 | technician:78 (photo IMG_0527.jpg), technician:40 (no photo, room locked) |
-| Install year unreadable or in the future | 7 | "unknown" ×4, "19987", "2000s", 2031 (technician:148 is also in bucket 1) |
+| Install year unreadable or in the future | 7 | "unknown" ×4, "19987", "2000s", 2031 |
 | Condition missing, not a number, or out of range | 5 | blank ×3, "Good" (technician:76), 11 (technician:144) |
 | Vague asset type | 4 | "fan", "heater", "HVAC unit", "unit" |
 | Serial number missing | 3 | "N/A" ×2 (technician:29, 91), "see schedule" (partner:54) |
@@ -54,7 +55,7 @@ partner:54 also has "One row describes 4 units".
 
 ## Estimate
 
-If buckets 1–3 were addressed, about **10 of the 53** flags would remain:
+If buckets 1–3 were addressed, about **10 of the 50** flags would remain:
 - the 9 judgment-call rows;
 - technician:40, which no capture rule fixes, because the room was locked and nothing was captured.
 

@@ -31,3 +31,4 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 17:28 | docs/REDUCING_REVIEW.md: 53 flags in four buckets (13 learnable, 29 fix at capture, 3 better matching, 9 judgment); about 10 would remain. Linked from NOTE_DRAFT. |
 | 17:30 | docs/EXTENDING.md for the PM and engineering pod: 7 extension points, 12 ranked assumptions. Linked from README and NOTE_DRAFT. |
 | 17:34 | Warning for workbook sheets that were not read (R29); EXTENDING #6 updated. 199 tests pass. |
+| 17:41 | Manufacturer completed from the same model elsewhere in the file (R6): 116 ready / 50 needs_review / 35 merged; 203 tests pass. |

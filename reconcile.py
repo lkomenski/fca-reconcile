@@ -1165,6 +1165,38 @@ def process_group(group):
     return output_rows
 
 
+def resolve_manufacturers_from_evidence(cleaned_rows):
+    """Complete a shortened manufacturer name when the file itself shows the full one (R6).
+
+    An unrecognized manufacturer like "Mitsubishi" is completed to
+    "Mitsubishi Electric" only if (a) it is the first word or words of
+    exactly one known manufacturer name, and (b) the same model (case and
+    spaces ignored) appears on another row in this run under that full name.
+    Otherwise the flag stays.
+    """
+    models_by_manufacturer = {}
+    for row in cleaned_rows:
+        manufacturer = row["values"]["manufacturer"]
+        model = lookup_key(row["values"]["model"])
+        if has_value(manufacturer) and model and not problems_for_field(row, "manufacturer"):
+            models_by_manufacturer.setdefault(manufacturer, set()).add(model)
+
+    for row in cleaned_rows:
+        problems = [p for p in problems_for_field(row, "manufacturer") if p.category == "Manufacturer not recognized"]
+        model = lookup_key(row["values"]["model"])
+        if not problems or not model:
+            continue
+        short_name = lookup_key(row["values"]["manufacturer"])
+        candidates = [name for name in mappings.MANUFACTURERS if lookup_key(name).startswith(short_name + " ")]
+        if len(candidates) != 1:
+            continue
+        full_name = candidates[0]
+        if model in models_by_manufacturer.get(full_name, set()):
+            row["values"]["manufacturer"] = full_name
+            row["problems"] = [p for p in row["problems"] if p not in problems]
+            row["manufacturer_from_evidence"] = True
+
+
 def flag_serials_in_several_buildings(cleaned_rows):
     """Flag every row whose serial also appears at another building (R24).
 
@@ -1340,6 +1372,8 @@ def automatic_work_counts(cleaned_rows):
             counts["years"] += 1
         if values["condition"] is not None:
             counts["conditions"] += 1
+        if row.get("manufacturer_from_evidence"):
+            counts["manufacturers_from_evidence"] += 1
         if has_value(values["location"]) and values["location"] != to_text(raw.get("location")):
             counts["rooms"] += 1
     return counts
@@ -1399,6 +1433,7 @@ def reconcile(technician_path, partner_path, current_year=None, asset_types_path
             row_errors.append(f"{record['row_id']}\n{traceback.format_exc()}")
             cleaned.append(fallback_row(record, error))
 
+    resolve_manufacturers_from_evidence(cleaned)
     flag_serials_in_several_buildings(cleaned)
 
     output_rows = []
@@ -1649,6 +1684,8 @@ def summary_text(result, technician_path, partner_path):
         "| Change | Rows |",
         "|---|---|",
         f"| Manufacturer spellings standardized | {automatic['manufacturers']} |",
+        f"| ...of which completed from the same model elsewhere in the file (e.g. `Mitsubishi` to `Mitsubishi Electric`) "
+        f"| {automatic['manufacturers_from_evidence']} |",
         f"| Asset types mapped to FMX's list | {automatic['asset_types']} |",
         f"| Building names standardized | {automatic['buildings']} |",
         f"| Install years converted to four digits | {automatic['years']} |",

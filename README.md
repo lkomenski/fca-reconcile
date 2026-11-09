@@ -28,7 +28,7 @@ When it finishes, it prints any warnings and a one-line count like:
 
 ```
 Warning: Sheet 'Legend' in the partner file was not read.
-Rows in: 146 technician + 55 partner. Ready: 113. Needs review: 53. Merged into duplicates: 35.
+Rows in: 146 technician + 55 partner. Ready: 116. Needs review: 50. Merged into duplicates: 35.
 ```
 
 The `Legend` warning is expected for FMX's partner file (see section 8).
@@ -61,7 +61,7 @@ A row with several problems lists them all, separated by ` | `.
 | Nameplate data missing; technician photo IMG_xxxx.jpg on file | Manufacturer, model and serial are all blank. | Open the photo and fill in the nameplate data. If it says "no photo on file", a site visit or the partner list is needed. |
 | Asset type 'X' is not in FMX's accepted list | The type is vague (e.g. "fan", "heater") or not one of FMX's accepted types (e.g. "Unit Heater", "Expansion Tank"). | Pick the correct type from `Asset_Types.xlsx`. If it's a common spelling, add it to `mappings.py` (section 6). |
 | Asset type is missing | No equipment type was captured. | Check the notes and photo; the technician may not have reached it. |
-| Manufacturer 'X' is not a recognized spelling | The name isn't in the known list. Plain "Mitsubishi" is left out on purpose because it could be Mitsubishi Electric or Mitsubishi Heavy Industries. | Confirm from the photo or model number. Add a new spelling to `mappings.py` if it's safe. |
+| Manufacturer 'X' is not a recognized spelling | The name isn't in the known list. Plain "Mitsubishi" is left out on purpose because it could be Mitsubishi Electric or Mitsubishi Heavy Industries; it is completed automatically only when the same model appears elsewhere in the file under the full name. | Confirm from the photo or model number. Add a new spelling to `mappings.py` if it's safe. |
 | Manufacturer is missing | A model or serial was captured but no manufacturer. | Fill it in from the photo or model number. |
 | Building 'X' is not a recognized building name / Building is missing | The building name doesn't match any known spelling or keyword. | Correct the building. Add the spelling to `mappings.py` if it's a real variant. |
 | Building 'X' matched [building] by keyword; confirm | The name isn't in the building list, but contains one building's keyword (e.g. "Middle Sch."). The building was filled in. | Check it really is that building, and not another school or a separate annex. If it is, add the spelling to `BUILDINGS` in `mappings.py` so it's ready next time. |

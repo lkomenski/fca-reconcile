@@ -617,7 +617,7 @@ def test_R22_three_outputs_written(tmp_path):
 def test_R22_summary_lists_every_unrecognized_value_by_field():
     result = rc.reconcile(REAL_TECHNICIAN, REAL_PARTNER, current_year=YEAR)
     text = rc.summary_text(result, REAL_TECHNICIAN, REAL_PARTNER)
-    assert "| Manufacturer | MITSUBISHI | technician | 2 |" in text
+    assert "| Manufacturer | MITSUBISHI |" not in text  # completed from the file's own evidence (R6)
     assert "| Asset type | Unit Heater | partner | 3 |" in text
     assert "| Install year | unknown | technician | 4 |" in text
     assert "| Condition | 11 | technician | 1 |" in text

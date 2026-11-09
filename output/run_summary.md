@@ -1,6 +1,6 @@
 # Run summary
 
-Run on 2026-11-08 at 17:32.
+Run on 2026-11-08 at 17:40.
 
 - Technician file: `Technician_Capture.csv.xlsx`
 - Partner file: `Partner_Equipment_List.xlsx`
@@ -12,12 +12,12 @@ Run on 2026-11-08 at 17:32.
 | Technician rows in | 146 |
 | Partner rows in | 55 |
 | **Total rows in** | **201** |
-| Rows ready | 113 |
-| Rows flagged (needs_review) | 53 |
+| Rows ready | 116 |
+| Rows flagged (needs_review) | 50 |
 | Rows merged into a duplicate | 35 (in 35 merged rows) |
 | Rows in import_ready.csv | 166 |
 
-Row check (R21): 201 in = 113 ready + 53 needs_review + 35 merged. Passed.
+Row check (R21): 201 in = 116 ready + 50 needs_review + 35 merged. Passed.
 
 ## Coverage by building
 
@@ -36,7 +36,8 @@ Values the tool fixed without a person, counted per input row before duplicates 
 
 | Change | Rows |
 |---|---|
-| Manufacturer spellings standardized | 101 |
+| Manufacturer spellings standardized | 105 |
+| ...of which completed from the same model elsewhere in the file (e.g. `Mitsubishi` to `Mitsubishi Electric`) | 4 |
 | Asset types mapped to FMX's list | 167 |
 | Building names standardized | 172 |
 | Install years converted to four digits | 30 |
@@ -61,7 +62,6 @@ Number of flagged rows with each reason. A row with several problems is counted 
 | Condition differs between sources | 5 |
 | Condition missing | 4 |
 | Note may affect row | 4 |
-| Manufacturer not recognized | 4 |
 | Serial number missing | 3 |
 | Identical to another row | 2 |
 | Install year differs between sources | 2 |
@@ -89,8 +89,6 @@ Each value below was kept as captured and flagged. Rows are input rows, counted 
 | Asset type | unit | technician | 1 |
 | Asset type | unit heater | technician | 1 |
 | Asset type | Unit Heater | technician | 1 |
-| Manufacturer | MITSUBISHI | technician | 2 |
-| Manufacturer | Mitsubishi | technician | 2 |
 | Condition | 11 | technician | 1 |
 | Condition | Good | technician | 1 |
 | Install year | unknown | technician | 4 |

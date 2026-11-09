@@ -359,7 +359,7 @@ def test_R31_real_file_panels_lp1a_and_lp1b_are_flagged():
     rows = {row["row_ids"][0]: row for row in result["rows"]}
     assert rows["technician:33"]["status"] == "needs_review"
     assert rows["technician:45"]["status"] == "needs_review"
-    assert result["counts"]["ready"] == 113
+    assert result["counts"]["ready"] == 116
 
 
 def test_R29_unread_sheets_are_warnings_and_run_continues(tmp_path, capsys):
@@ -381,3 +381,38 @@ def test_R29_unread_sheets_are_warnings_and_run_continues(tmp_path, capsys):
     assert "Sheet 'Legend' in the partner file was not read." in summary
     assert "Sheet 'Elementary'" not in summary  # the sheet that was read
     assert_plain(text)
+
+
+# --- R6: completing a manufacturer from the file's own evidence ---------------
+
+
+def test_R6_short_name_completed_when_same_model_appears_under_full_name():
+    evidence = clean(tech_record(29, manufacturer="Mitsubishi Electric", model="MSZ-GL12NA", serial_number="E1"))
+    short = clean(tech_record(34, manufacturer="MITSUBISHI", model=" msz-gl12na ", serial_number="E2"))
+    rc.resolve_manufacturers_from_evidence([evidence, short])
+    assert short["values"]["manufacturer"] == "Mitsubishi Electric"
+    assert not rc.problems_for_field(short, "manufacturer")
+
+
+def test_R6_short_name_stays_flagged_when_model_not_seen_elsewhere():
+    evidence = clean(tech_record(29, manufacturer="Mitsubishi Electric", model="MSZ-GL12NA", serial_number="E1"))
+    short = clean(tech_record(40, manufacturer="Mitsubishi", model="SUZ-KA09NA", serial_number="E3"))
+    rc.resolve_manufacturers_from_evidence([evidence, short])
+    assert short["values"]["manufacturer"] == "Mitsubishi"
+    assert rc.problems_for_field(short, "manufacturer")[0].category == "Manufacturer not recognized"
+
+
+def test_R6_evidence_under_a_different_brand_does_not_count():
+    other_brand = clean(tech_record(29, manufacturer="Carrier", model="MSZ-GL12NA", serial_number="E1"))
+    short = clean(tech_record(34, manufacturer="Mitsubishi", model="MSZ-GL12NA", serial_number="E2"))
+    rc.resolve_manufacturers_from_evidence([other_brand, short])
+    assert short["values"]["manufacturer"] == "Mitsubishi"
+
+
+def test_R6_real_file_completes_all_four_mitsubishi_rows():
+    result = rc.reconcile(REAL_TECHNICIAN, REAL_PARTNER, current_year=YEAR)
+    rows = {row["row_ids"][0]: row for row in result["rows"]}
+    for row_id in ("technician:34", "technician:88", "technician:93", "technician:148"):
+        assert rows[row_id]["values"]["manufacturer"] == "Mitsubishi Electric"
+    assert rows["technician:148"]["review_reason"] == "Install year 'unknown' could not be read as a year"
+    assert result["automatic"]["manufacturers_from_evidence"] == 4

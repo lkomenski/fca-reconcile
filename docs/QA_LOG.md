@@ -418,3 +418,16 @@ The total matches `import_ready.csv`. The 2 technician-only merges (`technician:
 3. **FMX files run twice** into separate folders: `import_ready.csv`, `review_list.csv`, `full_detail.csv` and `run_summary.md` are byte-identical. Caveat: `run_summary.md` includes the run time to the minute, so it matches only when both runs finish in the same minute. The three data files don't depend on time.
 **Fix:** No change needed.
 **Verified by:** The script output above, kept in `scratchpad/verify/`.
+
+### QA-033 · 2026-11-08 17:41 · Manufacturer completed from the file's own evidence
+**Rule(s):** R6
+**What looked off:** The 4 "Mitsubishi"/"MITSUBISHI" rows stayed flagged (QA-013), but the same file has `technician:29` "Mitsubishi Electric" with model MSZ-GL12NA and `technician:146` "Mitsubishi Electric" with model PKA-A24KA7. Those are exactly the models on the 4 short-name rows.
+**First theory:** The ambiguity (Mitsubishi Electric vs Heavy Industries) can be settled from the file itself, without a new lookup entry.
+**Cause:** n/a (new rule step).
+**How it was proven:**
+- Before: 113 ready / 53 needs_review / 35 merged. After: 116 / 50 / 35.
+- `technician:34`, `88` (MSZ-GL12NA) and `93` (PKA-A24KA7) are now "Mitsubishi Electric" and ready.
+- `technician:148` is completed too, but stays needs_review for its unreadable year only.
+- "Values the tool didn't recognize" no longer lists Mitsubishi. "Work done automatically": 105 manufacturer spellings, 4 of them completed from evidence.
+**Fix:** `resolve_manufacturers_from_evidence` runs after cleaning. It completes the name only when the unrecognized value is the first word or words of exactly one known manufacturer, and the same model (case and spaces ignored) appears on another row under that full name. Otherwise the flag stays. The why is recorded under R6. REDUCING_REVIEW.md, NOTE_DRAFT.md, README and EXTENDING.md numbers were updated.
+**Verified by:** `test_R6_short_name_completed_when_same_model_appears_under_full_name`, `test_R6_short_name_stays_flagged_when_model_not_seen_elsewhere`, `test_R6_evidence_under_a_different_brand_does_not_count`, `test_R6_real_file_completes_all_four_mitsubishi_rows`. Two tests updated for the new expected results: `test_R22_summary_lists_every_unrecognized_value_by_field` (Mitsubishi no longer listed) and `test_R31_real_file_panels_lp1a_and_lp1b_are_flagged` (116 ready). 203 tests pass.

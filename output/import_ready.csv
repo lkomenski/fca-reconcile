@@ -31,7 +31,7 @@ Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,61436881,2004,2,wing a
 Lakeview Elementary School,Backflow Preventer,Watts,LF909,K335623,2010,3,Water Entry Rm,technician,ready,
 Lakeview Elementary School,heater,A.O. Smith,BTH-199,1613S970920,2012,3,kitchen,technician,needs_review,"Asset type 'heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 1,technician,needs_review,Looks identical to another row in the import file; tell them apart by notes (technician:33 notes: 'Panel LP-1B'; technician:45 notes: 'Panel LP-1A')
-Lakeview Elementary School,Split System,MITSUBISHI,MSZ-GL12NA,3039513,2021,3,IT Closet 112,technician,needs_review,Manufacturer 'MITSUBISHI' is not a recognized spelling; confirm the manufacturer
+Lakeview Elementary School,Split System,Mitsubishi Electric,MSZ-GL12NA,3039513,2021,3,IT Closet 112,technician,ready,
 Lakeview Elementary School,Water Heater,A.O. Smith,BTH-199,0766A282310,2012,3,Blr Rm,technician,ready,
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,corridor 2,technician,ready,
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,1,Kitchen,technician,ready,
@@ -84,11 +84,11 @@ Lakeview Middle School,Transformer,Eaton,V48M28T75,MX4881866,1998,2,Elec Rm (mai
 Lakeview Middle School,Emergency Generator,Generac,SD150,4430000000,2011,3,exterior pad - south,technician,needs_review,Serial 4430000000 may have been damaged by Excel; check the photo or nameplate
 Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,2011,4,Elec Rm,technician,ready,
 Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,2011,3,kitchen,technician,ready,
-Lakeview Middle School,Split System,Mitsubishi,MSZ-GL12NA,6625103,2019,4,Main Office,technician,needs_review,Manufacturer 'Mitsubishi' is not a recognized spelling; confirm the manufacturer
+Lakeview Middle School,Split System,Mitsubishi Electric,MSZ-GL12NA,6625103,2019,4,Main Office,technician,ready,
 Lakeview Middle School,Elevator,Otis,hydrofit,N48451,2011,3,elevator machine rm,technician,ready,
 Lakeview Middle School,unit heater,Trane,UHSA-60,61B18352BN,1998,1,Gym,technician,needs_review,"Asset type 'unit heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview Middle School,Fire Alarm Control Panel,Notifier,NFS2-640,N/A,2011,4,main office,technician,needs_review,Serial number missing
-Lakeview Middle School,Split System,MITSUBISHI,PKA-A24KA7,7887295,2019,4,Server Rm,technician,needs_review,Manufacturer 'MITSUBISHI' is not a recognized spelling; confirm the manufacturer
+Lakeview Middle School,Split System,Mitsubishi Electric,PKA-A24KA7,7887295,2019,4,Server Rm,technician,ready,
 Lakeview Middle School,Unit Heater,Trane,UHSA-60,78A32150DL,1998,2,Gym,technician,needs_review,"Asset type 'Unit Heater' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview High School,Rooftop Unit,,,,,2,classroom wing roof,technician,needs_review,Nameplate data missing; technician photo IMG_0611.jpg on file
 Lakeview High School,Rooftop Unit,Trane,YCD150F3,09B24323TL,1998,2,Roof (Classroom Wing),both,ready,
@@ -142,7 +142,7 @@ Lakeview High School,Transformer,Square D,EE75T3H,AF0832398,2012,,electrical roo
 Lakeview High School,Elevator,Otis,HydroFit,W66938,,2,Elevator Machine Rm,technician,needs_review,Install year 'unknown' could not be read as a year
 Lakeview High School,unit,Mitsubishi Electric,PKA-A24KA7,2053203,2019,4,server rm,technician,needs_review,"Asset type 'unit' is not in FMX's accepted list; choose an accepted type, or ask FMX whether to add it"
 Lakeview High School,Fire Alarm Control Panel,Notifier,NFS2-640,2771145,,3,Main Office,technician,needs_review,Install year '2000s' could not be read as a year
-Lakeview High School,Split System,Mitsubishi,MSZ-GL12NA,7644930,,4,main office,technician,needs_review,Manufacturer 'Mitsubishi' is not a recognized spelling; confirm the manufacturer | Install year 'unknown' could not be read as a year
+Lakeview High School,Split System,Mitsubishi Electric,MSZ-GL12NA,7644930,,4,main office,technician,needs_review,Install year 'unknown' could not be read as a year
 Lakeview High School,Air Handling Unit,Daikin,CAH017G,FBOU863074,1998,2,Mechanical Room 120,partner,ready,
 Lakeview High School,Boiler,Lochinvar,FBN1501,8916A538488,2012,3,Boiler Room 108,partner,ready,
 Lakeview High School,Exhaust Fan,Greenheck,CUE-099,00644492,1997,2,"Roof, Locker Rooms",partner,ready,
