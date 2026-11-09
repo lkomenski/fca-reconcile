@@ -316,3 +316,47 @@ def test_R22_coverage_table_counts_sources_per_building():
     assert "| Lakeview Middle School | 46 | 0 | 0 | 46 |" in text
     assert "| Lakeview High School | 20 | 22 | 33 | 75 |" in text
     assert "| **All buildings** | 111 | 22 | 33 | 166 |" in text
+
+
+# --- Review fixes: R4 on merge, R17 pairing, R31 identical rows --------------
+
+
+def test_R4_keyword_building_keeps_confirm_flag_after_merge():
+    tech = clean(tech_record(2, building="Lakeview High School Annex", serial_number="K1"))
+    partner = clean(partner_record(5, serial_number="K1"))  # "Lakeview HS" is an alias
+    merged = rc.flag_row(rc.merge_duplicate([tech, partner]))
+    assert merged["values"]["building"] == "Lakeview High School"
+    assert "matched Lakeview High School by keyword; confirm" in merged["review_reason"]
+
+
+def test_R17_manufacturer_and_model_from_different_rows_is_flagged():
+    no_brand = clean(tech_record(5, manufacturer=None, model="FI2507", serial_number="MIX1"))
+    no_model = clean(tech_record(6, manufacturer="B&G", model=None, serial_number="MIX1"))
+    merged = rc.flag_row(rc.merge_duplicate([no_brand, no_model]))
+    assert (merged["values"]["manufacturer"], merged["values"]["model"]) == ("Bell & Gossett", "FI2507")
+    assert merged["status"] == "needs_review"
+    assert "Manufacturer (technician:6) and model (technician:5) come from different rows" in merged["review_reason"]
+
+
+def test_R17_normal_merge_with_both_on_one_row_is_not_flagged():
+    tech = clean(tech_record(2, model=None, serial_number="N1"))  # technician has no model
+    partner = clean(partner_record(5, serial_number="N1"))  # partner has both
+    assert rc.flag_row(rc.merge_duplicate([tech, partner]))["status"] == "ready"
+
+
+def test_R31_identical_ready_rows_are_flagged_with_notes():
+    first = rc.flag_row(rc.single_row(clean(tech_record(33, asset_type="Panel", serial_number=None, notes="Panel LP-1B"))))
+    second = rc.flag_row(rc.single_row(clean(tech_record(45, asset_type="Panel", serial_number=None, notes="Panel LP-1A"))))
+    rc.flag_identical_ready_rows([first, second])
+    for row in (first, second):
+        assert row["status"] == "needs_review"
+        assert "technician:33 notes: 'Panel LP-1B'" in row["review_reason"]
+        assert "technician:45 notes: 'Panel LP-1A'" in row["review_reason"]
+
+
+def test_R31_real_file_panels_lp1a_and_lp1b_are_flagged():
+    result = rc.reconcile(REAL_TECHNICIAN, REAL_PARTNER, current_year=YEAR)
+    rows = {row["row_ids"][0]: row for row in result["rows"]}
+    assert rows["technician:33"]["status"] == "needs_review"
+    assert rows["technician:45"]["status"] == "needs_review"
+    assert result["counts"]["ready"] == 113

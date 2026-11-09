@@ -20,6 +20,7 @@ import shutil
 import sys
 import tempfile
 import traceback
+import types
 from collections import Counter, namedtuple
 from datetime import date, datetime
 from pathlib import Path
@@ -33,7 +34,9 @@ try:
 
     MAPPINGS_ERROR = None
 except Exception as import_error:
-    mappings = None
+    # An empty stand-in, so the rest of the file still loads; main() stops
+    # with a plain message before anything uses it.
+    mappings = types.ModuleType("mappings")
     MAPPINGS_ERROR = import_error
 
 HERE = Path(__file__).resolve().parent
@@ -41,6 +44,12 @@ DEFAULT_ASSET_TYPES = HERE / "data" / "Asset_Types.xlsx"
 DEFAULT_TARGET_FORMAT = HERE / "data" / "Target_Format.xlsx"
 OUTPUT_FILES = ["import_ready.csv", "review_list.csv", "run_summary.md", "full_detail.csv"]
 ERROR_LOG = "error_log.txt"
+
+# R9: years that are probably misread rather than real. A year typed into a
+# date-formatted Excel cell shows up as a 1900s date (2004 -> 1905-06-26), and
+# a two-digit year that lands before 1970 is unlikely for building equipment.
+DATE_YEAR_MISREAD_BEFORE = 1950
+TWO_DIGIT_MISREAD_BEFORE = 1970
 KNOWN_EXTENSIONS = (".xlsx", ".xlsm", ".csv")
 
 # Lists every part of the tool needs from mappings.py.
@@ -512,7 +521,10 @@ def parse_install_year(raw, current_year):
     (2004-01-01) or a decimal (2004.0) is read as that year.
     """
     if isinstance(raw, date):
-        # R9: Excel turned the year into a date; the year part is what was meant.
+        # R9: Excel turned the year into a date; the year part is what was meant,
+        # unless it is so early that Excel probably turned "2004" into 1905-06-26.
+        if raw.year < DATE_YEAR_MISREAD_BEFORE:
+            return None, misread_year(to_text(raw), raw.year), False
         return check_year_range(raw.year, to_text(raw), current_year, False)
     text = to_text(raw)
     if not text:
@@ -521,7 +533,10 @@ def parse_install_year(raw, current_year):
     date_text_match = re.fullmatch(r"(\d{4})-\d{1,2}-\d{1,2}(?:[ T][\d:.]*)?", text)
     decimal_match = re.fullmatch(r"(\d{4})\.0+", text)
     if date_text_match:
-        return check_year_range(int(date_text_match.group(1)), text, current_year, False)
+        year = int(date_text_match.group(1))
+        if year < DATE_YEAR_MISREAD_BEFORE:
+            return None, misread_year(text, year), False
+        return check_year_range(year, text, current_year, False)
     if decimal_match:
         return check_year_range(int(decimal_match.group(1)), text, current_year, False)
 
@@ -546,6 +561,9 @@ def parse_install_year(raw, current_year):
             year = 2000 + two_digits
         else:
             year = 1900 + two_digits
+        if year < TWO_DIGIT_MISREAD_BEFORE:
+            # R9: "27" as 1927 is possible but unlikely for building equipment.
+            return None, misread_year(text, year), False
     elif manufacture_date_match:
         year = int(manufacture_date_match.group(1))
     else:
@@ -562,6 +580,16 @@ def check_year_range(year, text, current_year, approximate):
     if year < 1900:
         return None, unreadable_year(text), False
     return year, None, approximate
+
+
+def misread_year(text, year):
+    """The R9 problem for a year that was read, but probably wrongly."""
+    return Problem(
+        "install_year",
+        "Year may have been misread",
+        f"Year may have been misread; check nameplate (captured as '{text}', which reads as {year})",
+        text,
+    )
 
 
 def unreadable_year(text):
@@ -676,12 +704,21 @@ def check_serial_missing(asset_type, serial, nameplate_problem):
 
 
 def check_serial_rounded(serial):
-    """Flag an all-digit serial ending in 0000, which Excel may have rounded (R13)."""
-    if serial.isdigit() and serial.endswith("0000"):
+    """Flag a serial that Excel may have damaged (R13).
+
+    Three signs: all digits ending in 0000 (rounded), scientific notation
+    like 4.43E+09 (shortened), or all digits and longer than 15 (Excel keeps
+    only 15 significant digits, so the end is lost).
+    """
+    rounded = serial.isdigit() and serial.endswith("0000")
+    # Excel always writes the sign (4.43E+09); without it, "7989E905548" is a real serial.
+    scientific = re.fullmatch(r"\d+(?:\.\d+)?e[+-]\d+", serial, flags=re.IGNORECASE) is not None
+    too_long = serial.isdigit() and len(serial) > 15
+    if rounded or scientific or too_long:
         return Problem(
             "serial_number",
-            "Serial may be rounded by Excel",
-            f"Serial {serial} may have been rounded by Excel; check the photo or nameplate",
+            "Serial may be damaged by Excel",
+            f"Serial {serial} may have been damaged by Excel; check the photo or nameplate",
         )
     return None
 
@@ -942,6 +979,28 @@ def merge_condition(ordered_rows):
     return worst, problems
 
 
+def check_brand_model_pairing(group, values):
+    """Flag a merged row whose manufacturer and model were never captured together (R17).
+
+    R23 already stops a merge when two rows disagree. But if one row has
+    only a manufacturer and the other only a model, the merged row would
+    pair them without anyone having seen them on the same nameplate.
+    """
+    if not (has_value(values["manufacturer"]) and has_value(values["model"])):
+        return None
+    for row in group:
+        if has_value(row["values"]["manufacturer"]) and has_value(row["values"]["model"]):
+            return None  # one row has both, and R23 confirmed the others agree
+    manufacturer_rows = [row["row_id"] for row in group if has_value(row["values"]["manufacturer"])]
+    model_rows = [row["row_id"] for row in group if has_value(row["values"]["model"])]
+    return Problem(
+        None,
+        "Manufacturer and model from different rows",
+        f"Manufacturer ({', '.join(manufacturer_rows)}) and model ({', '.join(model_rows)}) come from "
+        "different rows; check they belong to the same unit",
+    )
+
+
 def source_label(rows):
     """"both" if the rows come from both files, otherwise the one file's name (R16)."""
     sources = {row["source"] for row in rows}
@@ -986,6 +1045,13 @@ def merge_duplicate(group):
     # Repeat-entry notes are not flagged here because the merge resolved them.
     for row in group:
         problems += [problem for problem in row["problems"] if problem.field is None]
+
+    # R4: a keyword-matched building always needs confirming, even if the
+    # other source supplied a building from the alias list.
+    for row in group:
+        problems += [problem for problem in row["problems"] if problem.category == "Building matched by keyword"]
+
+    problems.append(check_brand_model_pairing(group, values))
 
     return {
         "values": values,
@@ -1101,6 +1167,39 @@ def flag_serials_in_several_buildings(cleaned_rows):
                     f"Serial number also appears at {others}; check the serial and building",
                 )
             )
+
+
+def flag_identical_ready_rows(output_rows):
+    """Flag ready rows that would look identical in the import file (R31).
+
+    Two electrical panels in the same corridor can match on every import
+    column; only the technician's notes ("Panel LP-1A") tell them apart.
+    Each is flagged with every row's notes quoted, so the specialist can
+    tell them apart or spot a true duplicate.
+    """
+    groups = {}
+    for row in output_rows:
+        if row["status"] == "ready":
+            key = tuple(str(row["values"][field]) for field in FIELDS) + (row["source"],)
+            groups.setdefault(key, []).append(row)
+    for rows in groups.values():
+        if len(rows) < 2:
+            continue
+        descriptions = []
+        for row in rows:
+            notes = " / ".join(
+                to_text(member["raw"].get("notes")) for member in row["members"] if to_text(member["raw"].get("notes"))
+            )
+            descriptions.append(f"{', '.join(row['row_ids'])} notes: '{notes}'" if notes else f"{', '.join(row['row_ids'])} has no notes")
+        for row in rows:
+            row["problems"].append(
+                Problem(
+                    None,
+                    "Identical to another row",
+                    f"Looks identical to another row in the import file; tell them apart by notes ({'; '.join(descriptions)})",
+                )
+            )
+            flag_row(row)
 
 
 def plain_cause(error):
@@ -1266,6 +1365,8 @@ def reconcile(technician_path, partner_path, current_year=None, asset_types_path
                 output_row = single_row(row)
                 output_row["problems"].append(unprocessed_problem(error))
                 output_rows.append(flag_row(output_row))
+
+    flag_identical_ready_rows(output_rows)
 
     counts = check_row_accounting([record["row_id"] for record in records], output_rows)
     counts["technician_in"] = len(technician)

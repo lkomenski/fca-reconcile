@@ -30,7 +30,7 @@ Lakeview Elementary School,Split System,Mitsubishi Electric,MSZ-GL12NA,N/A,2021,
 Lakeview Elementary School,Exhaust Fan,Greenheck,G-120-VG,61436881,2004,2,wing a roof,technician,ready,
 Lakeview Elementary School,Backflow Preventer,Watts,LF909,K335623,2010,3,Water Entry Rm,technician,ready,
 Lakeview Elementary School,heater,A.O. Smith,BTH-199,1613S970920,2012,3,kitchen,technician,needs_review,Asset type 'heater' is not in the accepted list; choose the correct type
-Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 1,technician,ready,
+Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 1,technician,needs_review,Looks identical to another row in the import file; tell them apart by notes (technician:33 notes: 'Panel LP-1B'; technician:45 notes: 'Panel LP-1A')
 Lakeview Elementary School,Split System,MITSUBISHI,MSZ-GL12NA,3039513,2021,3,IT Closet 112,technician,needs_review,Manufacturer 'MITSUBISHI' is not a recognized spelling; confirm the manufacturer
 Lakeview Elementary School,Water Heater,A.O. Smith,BTH-199,0766A282310,2012,3,Blr Rm,technician,ready,
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,corridor 2,technician,ready,
@@ -41,7 +41,7 @@ Lakeview Elementary School,,,,,,,Rm 118,technician,needs_review,Asset type is mi
 Lakeview Elementary School,Emergency Generator,Generac,RG048,4586578415,2015,3,Exterior pad - South,technician,ready,
 Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,3,Elec Rm,technician,ready,
 Lakeview Elementary School,Fire Alarm Control Panel,Notifier,NFS-320,433183,2009,3,main office,technician,ready,
-Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 1,technician,ready,
+Lakeview Elementary School,Electrical Panel,Square D,NQ442L225,,2004,2,Corridor 1,technician,needs_review,Looks identical to another row in the import file; tell them apart by notes (technician:33 notes: 'Panel LP-1B'; technician:45 notes: 'Panel LP-1A')
 Lakeview Elementary School,Kitchen hood,CaptiveAire,ND-2,8657872,2016,4,kitchen,technician,needs_review,Asset type 'Kitchen hood' is not in the accepted list; choose the correct type
 Lakeview Elementary School,Transformer,Square D,EE75T3H,PU6233668,2004,3,main electrical room,technician,ready,
 Lakeview Middle School,Air Handling Unit,Trane,CSAA021,10Y25238HL,2011,3,Mech Mezzanine,technician,ready,
@@ -81,7 +81,7 @@ Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,,2,Corridor 2,technician,re
 Lakeview Middle School,Switchgear,Eaton,Pow-R-Line C,MB2688460,,1,Main Elec Rm,technician,ready,
 Lakeview Middle School,Electrical Panel,Cutler-Hammer,PRL1A,,2011,3,corridor 2,technician,ready,
 Lakeview Middle School,Transformer,Eaton,V48M28T75,MX4881866,1998,2,Elec Rm (main),technician,ready,
-Lakeview Middle School,Emergency Generator,Generac,SD150,4430000000,2011,3,exterior pad - south,technician,needs_review,Serial 4430000000 may have been rounded by Excel; check the photo or nameplate
+Lakeview Middle School,Emergency Generator,Generac,SD150,4430000000,2011,3,exterior pad - south,technician,needs_review,Serial 4430000000 may have been damaged by Excel; check the photo or nameplate
 Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,2011,4,Elec Rm,technician,ready,
 Lakeview Middle School,Electrical Panel,Eaton,PRL1A,,2011,3,kitchen,technician,ready,
 Lakeview Middle School,Split System,Mitsubishi,MSZ-GL12NA,6625103,2019,4,Main Office,technician,needs_review,Manufacturer 'Mitsubishi' is not a recognized spelling; confirm the manufacturer

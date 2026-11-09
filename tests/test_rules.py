@@ -2,6 +2,7 @@
 rule ID so the results can be read rule by rule."""
 
 import csv
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -290,7 +291,7 @@ def test_R8_location_cleaned_inside_a_full_row():
         (98, 1998, False),
         (21, 2021, False),
         (26, 2026, False),
-        (27, 1927, False),
+        (70, 1970, False),
         ("Mfg 04/2011", 2011, False),
         ("approx. 2004", 2004, True),
         ("~2004", 2004, True),
@@ -319,8 +320,27 @@ def test_R9_unclear_years_are_flagged_and_left_blank(raw, reason):
 
 
 def test_R9_two_digit_cutoff_follows_the_current_year():
-    assert rc.parse_install_year(28, 2026)[0] == 1928
+    assert rc.parse_install_year(28, 2026)[1].category == "Year may have been misread"  # 1928
     assert rc.parse_install_year(28, 2030)[0] == 2028
+
+
+@pytest.mark.parametrize(
+    "raw, reason",
+    [
+        (27, "Year may have been misread; check nameplate (captured as '27', which reads as 1927)"),
+        ("'69", "Year may have been misread; check nameplate (captured as ''69', which reads as 1969)"),
+        (datetime(1905, 6, 26), "Year may have been misread; check nameplate (captured as '1905-06-26 00:00:00', which reads as 1905)"),
+        ("1905-06-26", "Year may have been misread; check nameplate (captured as '1905-06-26', which reads as 1905)"),
+    ],
+)
+def test_R9_probably_misread_years_are_flagged_and_left_blank(raw, reason):
+    year, problem, _ = rc.parse_install_year(raw, YEAR)
+    assert year is None
+    assert problem.reason == reason
+
+
+def test_R9_real_date_year_after_1950_is_kept():
+    assert rc.parse_install_year(datetime(1998, 3, 1), YEAR)[0] == 1998
 
 
 # --- R10 / R11: condition ------------------------------------------------------
@@ -396,7 +416,19 @@ def test_R12_fully_blank_nameplate_not_also_flagged_serial_missing():
     assert row["review_reason"] == "Nameplate data missing; technician photo IMG_1.jpg on file"
 
 
-@pytest.mark.parametrize("serial, flagged", [("4430000000", True), ("4586578415", False), ("FBOU0000", False)])
+@pytest.mark.parametrize(
+    "serial, flagged",
+    [
+        ("4430000000", True),
+        ("4.43E+09", True),  # scientific notation
+        ("1E+15", True),
+        ("12345678901234569216", True),  # over 15 digits
+        ("123456789012345", False),  # exactly 15 digits
+        ("7989E905548", False),  # real A.O. Smith serial, no "+" sign
+        ("4586578415", False),
+        ("FBOU0000", False),
+    ],
+)
 def test_R13_all_digit_serial_ending_in_zeros_is_flagged(serial, flagged):
     assert (rc.check_serial_rounded(serial) is not None) == flagged
 

@@ -40,6 +40,7 @@ RULE_NAMES = {
     "R28": "never leave broken output",
     "R29": "warnings",
     "R30": "full detail, nothing captured is lost",
+    "R31": "identical ready rows",
     "UNSEEN": "full run on a made-up unseen file",
 }
 
