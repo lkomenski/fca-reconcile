@@ -28,3 +28,4 @@ Times are from the system clock or git commit times. See QA-012 for why earlier 
 | 17:21 | Verification: adversarial files re-run, mutated technician file (117 of 146 rows, shuffled, edited), FMX run twice (identical). FMX: 113 / 53 / 35; 198 tests pass. |
 | 17:22 | QA-030–032 logged; NOTE_DRAFT updated. |
 | 17:28 | "Work done automatically" counts added to the run summary (counts only). Commit below. |
+| 17:28 | docs/REDUCING_REVIEW.md: 53 flags in four buckets (13 learnable, 29 fix at capture, 3 better matching, 9 judgment); about 10 would remain. Linked from NOTE_DRAFT. |
